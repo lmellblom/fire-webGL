@@ -1,0 +1,10 @@
+body {
+	text-align: center;
+	background-color: white;
+}
+
+
+#glcanvas {
+	margin-top: 40px;
+	border: 1px solid black;
+}
