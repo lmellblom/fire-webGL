@@ -8,12 +8,10 @@
 
 var gl; // A global variable for the WebGL context
 
-function initWebGL(canvas) {
-  gl = null;
-  
+function initWebGL(canvas) {  
   try {
     // Try to grab the standard context. If it fails, fallback to experimental.
-    gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
+    gl = canvas.getContext("experimental-webgl"); // canvas.getContext("webgl") || 
     gl.viewportWidth = canvas.width;
     gl.viewportHeight = canvas.height;
   }
@@ -22,29 +20,9 @@ function initWebGL(canvas) {
   // If we don't have a GL context, give up now
   if (!gl) {
     alert("Unable to initialize WebGL. Your browser may not support it.");
-    gl = null;
   }
-  
-  return gl;
-}
-
-function start() {
-  var canvas = document.getElementById("glcanvas");
-
-  gl = initWebGL(canvas);      // Initialize the GL context
-  
-  // Only continue if WebGL is available and working
-  if (gl) {
-  	initShaders();
-    initBuffers();
-
-    gl.clearColor(0.0, 0.0, 0.0, 1.0);                      // Set clear color to black, fully opaque
-    gl.enable(gl.DEPTH_TEST);                               // Enable depth testing
-   // gl.depthFunc(gl.LEQUAL);                                // Near things obscure far things
-
-    drawScene();
   }
-}
+
 /* ----------------------------------------------------------------------------------- */
 
 /* Found this stuff on other site.. For setup the shaders and the program */
@@ -83,7 +61,6 @@ function getShader(gl, id) {
     return shader;
 }
 
-
 var shaderProgram;
 
 function initShaders() {
@@ -108,7 +85,6 @@ function initShaders() {
     shaderProgram.mvMatrixUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
 }
 
-// KIKA på vad detta gör, tror den sätter up modelview matrix och perspective.. 
 var mvMatrix = mat4.create();
 var pMatrix = mat4.create();
 
@@ -117,42 +93,72 @@ function setMatrixUniforms() {
     gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, mvMatrix);
 }
 
-/* ----------------------------------------------------------------------------------- */
+var vpb; // vertexpositionbuffer, a square
 
-var vertexPositionBuffer;
-
-// create a buffer for the vertex positions
 function initBuffers() {
-	vertexPositionBuffer = gl.createBuffer();
-
-	gl.bindBuffer(gl.ARRAY_BUFFER, vertexPositionBuffer);
-
-	// to draw a triangle
-	var vertices = [ 
-         0.0,  1.0,  0.0,
-        -1.0, -1.0,  0.0,
-         1.0, -1.0,  0.0
+    vpb = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, vpb);
+    vertices = [
+         1.0,  1.0,  0.0,
+        -1.0,  1.0,  0.0,
+         1.0, -1.0,  0.0,
+        -1.0, -1.0,  0.0
     ];
-
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
-
-    vertexPositionBuffer.itemSize = 3;
-    vertexPositionBuffer.numItems = 3;
+    vpb.itemSize = 3;
+    vpb.numItems = 4;
 }
 
 function drawScene() {
-	gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
-	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);	 // Clear the color as well as the depth buffer.
+    gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-	mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0, pMatrix);
+    mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0, pMatrix);
+
     mat4.identity(mvMatrix);
 
-    mat4.translate(mvMatrix, [0.0, 0.0, -10.0]); // x y z
-    gl.bindBuffer(gl.ARRAY_BUFFER, vertexPositionBuffer);
-    gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, vertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+    mat4.translate(mvMatrix, [0.0, 0.0, -4.0]);
+    gl.bindBuffer(gl.ARRAY_BUFFER, vpb);
+    gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, vpb.itemSize, gl.FLOAT, false, 0, 0);
     setMatrixUniforms();
-    gl.drawArrays(gl.TRIANGLES, 0, vertexPositionBuffer.numItems);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, vpb.numItems);
+
+    // check what time it is and set as uniform variable for the animation
+    var currentTime = (new Date).getTime(); // returns millisecunds
+    gl.uniform1f(shaderProgram.uTime, 0.001 * (currentTime - startTime)); 
 
 }
 
+var startTime = (new Date).getTime();
+
+function tick() {
+	requestAnimFrame(tick);
+	drawScene();
+}
+
+function webGLStart() {
+    var canvas = document.getElementById("glcanvas");
+    initWebGL(canvas);
+    initShaders();
+    initBuffers();
+
+    gl.clearColor(0.0, 0.0, 0.0, 1.0);
+    gl.enable(gl.DEPTH_TEST);
+
+    tick(); 
+}
+
+/**
+ * Provides requestAnimationFrame in a cross browser way.
+ */
+window.requestAnimFrame = (function() {
+  return window.requestAnimationFrame ||
+         window.webkitRequestAnimationFrame ||
+         window.mozRequestAnimationFrame ||
+         window.oRequestAnimationFrame ||
+         window.msRequestAnimationFrame ||
+         function(/* function FrameRequestCallback */ callback, /* DOMElement Element */ element) {
+           window.setTimeout(callback, 1000/60);
+         };
+})();
 
