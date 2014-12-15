@@ -81,6 +81,9 @@ function initShaders() {
     shaderProgram.vertexPositionAttribute = gl.getAttribLocation(shaderProgram, "aVertexPosition");
     gl.enableVertexAttribArray(shaderProgram.vertexPositionAttribute);
 
+    shaderProgram.vertexColorAttribute = gl.getAttribLocation(shaderProgram, "aVertexColor");
+    gl.enableVertexAttribArray(shaderProgram.vertexColorAttribute);
+
     shaderProgram.pMatrixUniform = gl.getUniformLocation(shaderProgram, "uPMatrix");
     shaderProgram.mvMatrixUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
 }
@@ -94,6 +97,7 @@ function setMatrixUniforms() {
 }
 
 var vpb; // vertexpositionbuffer, a square
+var vcb; // vertexcolorbuffer
 
 function initBuffers() {
     vpb = gl.createBuffer();
@@ -107,19 +111,41 @@ function initBuffers() {
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
     vpb.itemSize = 3;
     vpb.numItems = 4;
+
+    // colors, just now rainbow.. change later
+    vcb = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, vcb);
+
+    var colors = [
+        1.0, 0.0, 0.0, 1.0,
+        0.0, 1.0, 0.0, 1.0,
+        0.0, 0.0, 1.0, 1.0,
+        0.0, 1.0, 1.0, 1.0
+    ];
+
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
+    vcb.itemSize = 4;
+    vcb.numItems = 4;
 }
 
 function drawScene() {
     gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
+    // set perspective right 
     mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0, pMatrix);
-
     mat4.identity(mvMatrix);
+	mat4.translate(mvMatrix, [0.0, 0.0, -4.0]);
 
-    mat4.translate(mvMatrix, [0.0, 0.0, -4.0]);
+	// init the buffer for the square
     gl.bindBuffer(gl.ARRAY_BUFFER, vpb);
     gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, vpb.itemSize, gl.FLOAT, false, 0, 0);
+    
+    // set the colors
+    gl.bindBuffer(gl.ARRAY_BUFFER, vcb);
+    gl.vertexAttribPointer(shaderProgram.vertexColorAttribute, vcb.itemSize, gl.FLOAT, false, 0, 0);
+
+
     setMatrixUniforms();
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, vpb.numItems);
 
@@ -128,6 +154,20 @@ function drawScene() {
     gl.uniform1f(shaderProgram.uTime, 0.001 * (currentTime - startTime)); 
 
 }
+
+/**
+ * Provides requestAnimationFrame in a cross browser way.
+ */
+window.requestAnimFrame = (function() {
+  return window.requestAnimationFrame ||
+         window.webkitRequestAnimationFrame ||
+         window.mozRequestAnimationFrame ||
+         window.oRequestAnimationFrame ||
+         window.msRequestAnimationFrame ||
+         function(/* function FrameRequestCallback */ callback, /* DOMElement Element */ element) {
+           window.setTimeout(callback, 1000/60);
+         };
+})();
 
 var startTime = (new Date).getTime();
 
@@ -148,17 +188,5 @@ function webGLStart() {
     tick(); 
 }
 
-/**
- * Provides requestAnimationFrame in a cross browser way.
- */
-window.requestAnimFrame = (function() {
-  return window.requestAnimationFrame ||
-         window.webkitRequestAnimationFrame ||
-         window.mozRequestAnimationFrame ||
-         window.oRequestAnimationFrame ||
-         window.msRequestAnimationFrame ||
-         function(/* function FrameRequestCallback */ callback, /* DOMElement Element */ element) {
-           window.setTimeout(callback, 1000/60);
-         };
-})();
+
 
