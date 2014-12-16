@@ -61,6 +61,16 @@ function getShader(gl, id) {
     return shader;
 }
 
+var mvMatrix = mat4.create();
+var pMatrix = mat4.create();
+
+function setMatrixUniforms() {
+    gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, pMatrix);
+    gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, mvMatrix);
+}
+
+// -------------------------------------------------------------
+
 var shaderProgram;
 
 function initShaders() {
@@ -84,20 +94,19 @@ function initShaders() {
     shaderProgram.vertexColorAttribute = gl.getAttribLocation(shaderProgram, "aVertexColor");
     gl.enableVertexAttribArray(shaderProgram.vertexColorAttribute);
 
+    shaderProgram.aTextureCoord = gl.getAttribLocation(shaderProgram, "aTextureCoord");
+    gl.enableVertexAttribArray(shaderProgram.aTextureCoord);
+
     shaderProgram.pMatrixUniform = gl.getUniformLocation(shaderProgram, "uPMatrix");
     shaderProgram.mvMatrixUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
-}
 
-var mvMatrix = mat4.create();
-var pMatrix = mat4.create();
+    shaderProgram.uTime = gl.getUniformLocation(shaderProgram, "uTime");
 
-function setMatrixUniforms() {
-    gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, pMatrix);
-    gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, mvMatrix);
 }
 
 var vpb; // vertexpositionbuffer, a square
 var vcb; // vertexcolorbuffer
+var vtcb; // vertextexturecoordbuffer
 
 function initBuffers() {
     vpb = gl.createBuffer();
@@ -126,6 +135,21 @@ function initBuffers() {
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
     vcb.itemSize = 4;
     vcb.numItems = 4;
+
+    // texture coords, för att kunna beräkna x och y typ just nu
+    vtcb = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, vtcb);
+        var textureCoords = [
+          // Stretch unit square for texcoords across the single face
+          0.0, 0.0,
+          1.0, 0.0,
+          1.0, 1.0,
+          0.0, 1.0,
+        ];
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(textureCoords), gl.STATIC_DRAW);
+        vtcb.itemSize = 2;
+        vtcb.numItems = 4;
+
 }
 
 function drawScene() {
@@ -135,7 +159,7 @@ function drawScene() {
     // set perspective right 
     mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0, pMatrix);
     mat4.identity(mvMatrix);
-	mat4.translate(mvMatrix, [0.0, 0.0, -4.0]);
+	mat4.translate(mvMatrix, [0.0, 0.0, -3.0]);
 
 	// init the buffer for the square
     gl.bindBuffer(gl.ARRAY_BUFFER, vpb);
@@ -145,12 +169,16 @@ function drawScene() {
     gl.bindBuffer(gl.ARRAY_BUFFER, vcb);
     gl.vertexAttribPointer(shaderProgram.vertexColorAttribute, vcb.itemSize, gl.FLOAT, false, 0, 0);
 
+    //set the texture coords
+    gl.bindBuffer(gl.ARRAY_BUFFER, vtcb);
+    gl.vertexAttribPointer(shaderProgram.aTextureCoord, vtcb.itemSize, gl.FLOAT, false, 0, 0);
 
     setMatrixUniforms();
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, vpb.numItems);
 
     // check what time it is and set as uniform variable for the animation
     var currentTime = (new Date).getTime(); // returns millisecunds
+
     gl.uniform1f(shaderProgram.uTime, 0.001 * (currentTime - startTime)); 
 
 }
