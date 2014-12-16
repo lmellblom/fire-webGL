@@ -91,9 +91,6 @@ function initShaders() {
     shaderProgram.vertexPositionAttribute = gl.getAttribLocation(shaderProgram, "aVertexPosition");
     gl.enableVertexAttribArray(shaderProgram.vertexPositionAttribute);
 
-    shaderProgram.vertexColorAttribute = gl.getAttribLocation(shaderProgram, "aVertexColor");
-    gl.enableVertexAttribArray(shaderProgram.vertexColorAttribute);
-
     shaderProgram.aTextureCoord = gl.getAttribLocation(shaderProgram, "aTextureCoord");
     gl.enableVertexAttribArray(shaderProgram.aTextureCoord);
 
@@ -104,51 +101,48 @@ function initShaders() {
 
 }
 
-var vpb; // vertexpositionbuffer, a square
-var vcb; // vertexcolorbuffer
-var vtcb; // vertextexturecoordbuffer
+var vertexPositionBuffer;
+var vertexCoordBuffer; 
+var vertexIndexBuffer; 
 
 function initBuffers() {
-    vpb = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, vpb);
+    vertexPositionBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, vertexPositionBuffer);
     vertices = [
-         1.0,  1.0,  0.0,
-        -1.0,  1.0,  0.0,
+        -1.0, -1.0,  0.0,
          1.0, -1.0,  0.0,
-        -1.0, -1.0,  0.0
+         1.0,  1.0,  0.0,
+        -1.0,  1.0,  0.0
     ];
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
-    vpb.itemSize = 3;
-    vpb.numItems = 4;
-
-    // colors, just now rainbow.. change later
-    vcb = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, vcb);
-
-    var colors = [
-        1.0, 0.0, 0.0, 1.0,
-        0.0, 1.0, 0.0, 1.0,
-        0.0, 0.0, 1.0, 1.0,
-        0.0, 1.0, 1.0, 1.0
-    ];
-
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
-    vcb.itemSize = 4;
-    vcb.numItems = 4;
+    vertexPositionBuffer.itemSize = 3;
+    vertexPositionBuffer.numItems = 4;
 
     // texture coords, för att kunna beräkna x och y typ just nu
-    vtcb = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, vtcb);
-        var textureCoords = [
-          // Stretch unit square for texcoords across the single face
-          0.0, 0.0,
-          1.0, 0.0,
-          1.0, 1.0,
-          0.0, 1.0,
-        ];
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(textureCoords), gl.STATIC_DRAW);
-        vtcb.itemSize = 2;
-        vtcb.numItems = 4;
+    vertexCoordBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, vertexCoordBuffer);
+    var textureCoords = [
+      // Stretch unit square for texcoords across the single face
+      0.0, 0.0,
+      1.0, 0.0,
+      1.0, 1.0,
+      0.0, 1.0,
+      ];
+  	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(textureCoords), gl.STATIC_DRAW);
+  	vertexCoordBuffer.itemSize = 2;
+  	vertexCoordBuffer.numItems = 4;
+
+  	// to draw a single quad.
+  	vertexIndexBuffer = gl.createBuffer();
+  	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, vertexIndexBuffer);
+  	var vertexIndices = [
+  		// a single quad, made from two triangles
+  		0,1,2,	0,2,3
+  	];
+	gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,
+			new Uint16Array(vertexIndices), gl.STATIC_DRAW);
+    vertexIndexBuffer.itemSize = 1;
+    vertexIndexBuffer.numItems = 6;
 
 }
 
@@ -162,30 +156,27 @@ function drawScene() {
 	mat4.translate(mvMatrix, [0.0, 0.0, -3.0]);
 
 	// init the buffer for the square
-    gl.bindBuffer(gl.ARRAY_BUFFER, vpb);
-    gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, vpb.itemSize, gl.FLOAT, false, 0, 0);
+    gl.bindBuffer(gl.ARRAY_BUFFER, vertexPositionBuffer);
+    gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, vertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
     
-    // set the colors
-    gl.bindBuffer(gl.ARRAY_BUFFER, vcb);
-    gl.vertexAttribPointer(shaderProgram.vertexColorAttribute, vcb.itemSize, gl.FLOAT, false, 0, 0);
-
     //set the texture coords
-    gl.bindBuffer(gl.ARRAY_BUFFER, vtcb);
-    gl.vertexAttribPointer(shaderProgram.aTextureCoord, vtcb.itemSize, gl.FLOAT, false, 0, 0);
+    gl.bindBuffer(gl.ARRAY_BUFFER, vertexCoordBuffer);
+    gl.vertexAttribPointer(shaderProgram.aTextureCoord, vertexCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, vertexIndexBuffer);
 
     setMatrixUniforms();
-    gl.drawArrays(gl.TRIANGLE_STRIP, 0, vpb.numItems);
+    		// Draw the single quad
+    gl.drawElements(gl.TRIANGLES, vertexIndexBuffer.numItems,
+			gl.UNSIGNED_SHORT, 0);
 
     // check what time it is and set as uniform variable for the animation
     var currentTime = (new Date).getTime(); // returns millisecunds
-
     gl.uniform1f(shaderProgram.uTime, 0.001 * (currentTime - startTime)); 
 
 }
 
-/**
- * Provides requestAnimationFrame in a cross browser way.
- */
+// to work cross-platform
 window.requestAnimFrame = (function() {
   return window.requestAnimationFrame ||
          window.webkitRequestAnimationFrame ||
@@ -197,13 +188,14 @@ window.requestAnimFrame = (function() {
          };
 })();
 
+// draw animation
 var startTime = (new Date).getTime();
-
 function tick() {
 	requestAnimFrame(tick);
 	drawScene();
 }
 
+// function to call when the site loading. 
 function webGLStart() {
     var canvas = document.getElementById("glcanvas");
     initWebGL(canvas);
