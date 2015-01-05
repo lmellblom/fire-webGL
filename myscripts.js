@@ -146,6 +146,7 @@ function initBuffers() {
 
 }
 
+var startTime = (new Date).getTime();
 function drawScene() {
     gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -153,9 +154,9 @@ function drawScene() {
     // set perspective right 
     mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0, pMatrix);
     mat4.identity(mvMatrix);
-	mat4.translate(mvMatrix, [0.0, 0.0, -3.0]);
+	  mat4.translate(mvMatrix, [0.0, 0.0, -3.0]);
 
-	// init the buffer for the square
+	  // init the buffer for the square
     gl.bindBuffer(gl.ARRAY_BUFFER, vertexPositionBuffer);
     gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, vertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
     
@@ -166,7 +167,7 @@ function drawScene() {
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, vertexIndexBuffer);
 
     setMatrixUniforms();
-    		// Draw the single quad
+    // Draw the single quad
     gl.drawElements(gl.TRIANGLES, vertexIndexBuffer.numItems,
 			gl.UNSIGNED_SHORT, 0);
 
@@ -188,11 +189,29 @@ window.requestAnimFrame = (function() {
          };
 })();
 
+// for counting FPS
+var timeElapsed = 0;
+var frameCount = 0;
+var lastTime = (new Date).getTime();
+
 // draw animation
-var startTime = (new Date).getTime();
 function tick() {
 	requestAnimFrame(tick);
 	drawScene();
+
+	/*
+	// ------ for counting FPS ----------------
+	var fpsElement = document.getElementById("fps");
+	var now = (new Date).getTime();
+	frameCount ++;
+	timeElapsed += (now - lastTime);
+	lastTime = now;
+	if (timeElapsed >= 1000) {
+		fps = frameCount;
+		frameCount = 0;
+		timeElapsed -= 1000;
+		fpsElement.innerHTML = fps.toFixed(2);
+	}*/
 }
 
 // function to call when the site loading. 

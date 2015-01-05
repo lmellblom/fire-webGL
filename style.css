@@ -1,9 +1,16 @@
 body {
 	text-align: center;
 	background-color: black;
+	color: white;
+	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  	font-size: 11px;
 }
 
 #glcanvas {
-	margin-top: 40px;
+	margin-top: 30px;
 	border: 1px solid black;
+}
+
+h1 {
+	font-family: 'Josefin Sans', sans-serif !important;
 }
