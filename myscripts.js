@@ -21,52 +21,52 @@ function initWebGL(canvas) {
   if (!gl) {
     alert("Unable to initialize WebGL. Your browser may not support it.");
   }
-  }
+}
 
 /* ----------------------------------------------------------------------------------- */
 
 /* Found this stuff on other site.. For setup the shaders and the program */
 function getShader(gl, id) {
-    var shaderScript = document.getElementById(id);
-    if (!shaderScript) {
-        return null;
-    }
+  var shaderScript = document.getElementById(id);
+  if (!shaderScript) {
+      return null;
+  }
 
-    var str = "";
-    var k = shaderScript.firstChild;
-    while (k) {
-        if (k.nodeType == 3) {
-            str += k.textContent;
-        }
-        k = k.nextSibling;
-    }
+  var str = "";
+  var k = shaderScript.firstChild;
+  while (k) {
+      if (k.nodeType == 3) {
+          str += k.textContent;
+      }
+      k = k.nextSibling;
+  }
 
-    var shader;
-    if (shaderScript.type == "x-shader/x-fragment") {
-        shader = gl.createShader(gl.FRAGMENT_SHADER);
-    } else if (shaderScript.type == "x-shader/x-vertex") {
-        shader = gl.createShader(gl.VERTEX_SHADER);
-    } else {
-        return null;
-    }
+  var shader;
+  if (shaderScript.type == "x-shader/x-fragment") {
+      shader = gl.createShader(gl.FRAGMENT_SHADER);
+  } else if (shaderScript.type == "x-shader/x-vertex") {
+      shader = gl.createShader(gl.VERTEX_SHADER);
+  } else {
+      return null;
+  }
 
-    gl.shaderSource(shader, str);
-    gl.compileShader(shader);
+  gl.shaderSource(shader, str);
+  gl.compileShader(shader);
 
-    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-        alert(gl.getShaderInfoLog(shader));
-        return null;
-    }
+  if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+      alert(gl.getShaderInfoLog(shader));
+      return null;
+  }
 
-    return shader;
+  return shader;
 }
 
 var mvMatrix = mat4.create();
 var pMatrix = mat4.create();
 
 function setMatrixUniforms() {
-    gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, pMatrix);
-    gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, mvMatrix);
+  gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, pMatrix);
+  gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, mvMatrix);
 }
 
 // -------------------------------------------------------------
@@ -74,32 +74,61 @@ function setMatrixUniforms() {
 var shaderProgram;
 
 function initShaders() {
-    var fragmentShader = getShader(gl, "shader-fs");
-    var vertexShader = getShader(gl, "shader-vs");
+  var fragmentShader = getShader(gl, "shader-fs");
+  var vertexShader = getShader(gl, "shader-vs");
 
-    shaderProgram = gl.createProgram();
-    gl.attachShader(shaderProgram, vertexShader);
-    gl.attachShader(shaderProgram, fragmentShader);
-    gl.linkProgram(shaderProgram);
+  shaderProgram = gl.createProgram();
+  gl.attachShader(shaderProgram, vertexShader);
+  gl.attachShader(shaderProgram, fragmentShader);
+  gl.linkProgram(shaderProgram);
 
-    if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
-        alert("Could not initialise shaders");
-    }
+  if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
+    alert("Could not initialise shaders");
+  }
 
-    gl.useProgram(shaderProgram);
+  gl.useProgram(shaderProgram);
 
-    shaderProgram.vertexPositionAttribute = gl.getAttribLocation(shaderProgram, "aVertexPosition");
-    gl.enableVertexAttribArray(shaderProgram.vertexPositionAttribute);
+  shaderProgram.vertexPositionAttribute = gl.getAttribLocation(shaderProgram, "aVertexPosition");
+  gl.enableVertexAttribArray(shaderProgram.vertexPositionAttribute);
 
-    shaderProgram.aTextureCoord = gl.getAttribLocation(shaderProgram, "aTextureCoord");
-    gl.enableVertexAttribArray(shaderProgram.aTextureCoord);
+  shaderProgram.aTextureCoord = gl.getAttribLocation(shaderProgram, "aTextureCoord");
+  gl.enableVertexAttribArray(shaderProgram.aTextureCoord);
 
-    shaderProgram.pMatrixUniform = gl.getUniformLocation(shaderProgram, "uPMatrix");
-    shaderProgram.mvMatrixUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
+  shaderProgram.pMatrixUniform = gl.getUniformLocation(shaderProgram, "uPMatrix");
+  shaderProgram.mvMatrixUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
 
-    shaderProgram.uTime = gl.getUniformLocation(shaderProgram, "uTime");
+  // används för att skriva ut i pixlar istället för -1 till 1 som alltid är i typ..
+  shaderProgram.resolutionLocation = gl.getUniformLocation(shaderProgram, "u_resolution");
+  gl.uniform2f(shaderProgram.resolutionLocation, document.getElementById("glcanvas").width, document.getElementById("glcanvas").height);
+
+  shaderProgram.uTime = gl.getUniformLocation(shaderProgram, "uTime");
 
 }
+
+// handle textrues. stegu. 
+function handleLoadedTexture(texture) {
+  gl.bindTexture(gl.TEXTURE_2D, texture);
+  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, texture.image);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+  // Image dimensions might be not-powers-of-two (NPOT), so avoid unsupported wrap modes
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  // Do not generate mipmaps. Mipmaps are not supported for NPOT textures in WebGL.
+  gl.bindTexture(gl.TEXTURE_2D, null);
+}
+var TextureRGBA;
+
+function initTexture() {
+  TextureRGBA = gl.createTexture();
+  TextureRGBA.image = new Image();
+  TextureRGBA.image.onload = function () {
+    handleLoadedTexture(TextureRGBA)
+  }
+  TextureRGBA.image.src = "fire.gif";
+}
+
 
 var vertexPositionBuffer;
 var vertexCoordBuffer; 
@@ -107,12 +136,13 @@ var vertexIndexBuffer;
 
 function initBuffers() {
     vertexPositionBuffer = gl.createBuffer();
+
     gl.bindBuffer(gl.ARRAY_BUFFER, vertexPositionBuffer);
     vertices = [
-        -1.0, -1.0,  0.0,
-         1.0, -1.0,  0.0,
-         1.0,  1.0,  0.0,
-        -1.0,  1.0,  0.0
+        0.0,    0.0,    0.0,
+        500.0,  0.0,    0.0,
+        500.0,  500.0,  0.0,
+        0.0,    500.0,  0.0
     ];
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
     vertexPositionBuffer.itemSize = 3;
@@ -163,6 +193,11 @@ function drawScene() {
     //set the texture coords
     gl.bindBuffer(gl.ARRAY_BUFFER, vertexCoordBuffer);
     gl.vertexAttribPointer(shaderProgram.aTextureCoord, vertexCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+    // set texture image
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, TextureRGBA);
+    gl.uniform1i(shaderProgram.uSampler, 0); // Texture unit 0
 
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, vertexIndexBuffer);
 
@@ -220,6 +255,7 @@ function webGLStart() {
     initWebGL(canvas);
     initShaders();
     initBuffers();
+    initTexture();
 
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
     gl.enable(gl.DEPTH_TEST);

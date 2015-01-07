@@ -22,6 +22,9 @@
   	varying vec2 vTextureCoord;
   	uniform float uTime; 
 
+  	// our texture
+	uniform sampler2D u_image;
+
   	// --------------- FLOW NOISE --------------------------------
 	// Helper constants
 	#define F2 0.366025403
@@ -297,42 +300,78 @@
 
     void main(void) {
         vec2 g1, g2; // gradient out
-        vec2 p = 2.0*vTextureCoord;
-        float time = uTime;
+        vec2 p = vTextureCoord;
+        float t = uTime;
 
-  		// sort of fire... not very good though
-  		float n = abs(snoise(vec3(p,0.2*uTime)));
-  		n += 0.5 * abs(snoise(vec3(p * 2.0,0.4*uTime)));
-  		n += 0.25 * abs(snoise(vec3(p * 4.0,0.9*uTime)));
-  		n += 0.125 * abs(snoise(vec3(p * 8.0,2.0*uTime)));
+        
+        // -----------------------RUTMÖNSTER------------------------------------------
+        // samma rutmönster som jag gjorde i labb 1 i java.. portade till webgl för att försöka förstå allt lite mer... 
+        float r,g,b;
+        float tile_w = 0.5/4.0;
+        float tile_h = 0.5/4.0;
+
+        float u2 = floor(p.x/tile_w);
+        float v2 = floor(p.y/tile_w);
+
+       // u2 = p.x*4.0;
+        //v2 = p.y*4.0;
+
+        r = 0.5 + 0.5 * snoise(vec3(u2,v2,0.3*t));
+        g = 0.5 + 0.5 * snoise(vec3(u2+t,v2,0.2*t));
+        b = 0.5 + 0.5 * snoise(vec3(u2+t,v2+t,0.7*t));
+
+        float tile_coord_u = abs(mod(p.x / tile_w,1.0)-0.5);//-0.5);
+		float tile_coord_v = abs(mod(p.y / tile_h,1.0)-0.5);//-0.5);
+
+		// effects
+		float tilted_squares = smoothstep(0.2, 0.5,tile_coord_u +tile_coord_v);
+		float circles = (tile_coord_u*tile_coord_u +tile_coord_v*tile_coord_v)*9.0-0.3; // make a circle, 
+		float smoothCircles = smoothstep(0.3,0.5, circles); // gives a more smooth circle in color.. not so irritating
+		
+		float addEffect = -circles; // bara så jag slipper ändra på 3 ställen när jag vill byta
+											// om negativ så blir det svart bakgrund.
+
+		r+=addEffect; g+=addEffect; b+=addEffect; //lägger på lager
+
+		//gl_FragColor = vec4(vec3(r,g,b), 1.0);
+		// -----------------------------------------------------------------------------------
+		
+		
+		// -----------FÖRSÖK TILL ELD ---------------------------------------------------
 
   		// flow noise, crappy fire..
-  		float n1 = abs(srdnoise(5.0*p, 0.2*time, g1));
-  		n1 += abs(srdnoise(3.0*p-vec2(4.0,-3.0), time*0.3, g2));
+  		float n1 = (srdnoise(5.0*p, 0.2*t, g1));
+  		n1 += (srdnoise(3.0*p-vec2(4.0,-3.0), t*0.3, g2));
   		n1 = mix(n1, srdnoise(8.0*p, 0.3, g2), 0.4);
-  		n1 += abs(srdnoise(2.0*p, 0.4*time, g2));
+  		n1 += (srdnoise(2.0*p, 0.4*t, g2));
   		n1 = 1.0-abs(n1);
 
   		// sort of fire with simplex
-  		float n2 = snoise(vec3(p.x,p.y,0.2*uTime))*0.5+0.5;
-  		n2 += 0.5 * snoise(vec3(2.0*p.x,4.0*p.y,0.4*uTime))*0.5;
-  		n2 += 0.25*snoise(vec3(4.0*p,0.6*uTime))*0.5;
-  		n2 += 0.125*snoise(vec3(8.0*p,1.0))*0.5;
+  		float n2 = snoise(vec3(p.x,p.y+0.7*t,0.3*t))*0.5+0.5;
+  		n2 += 0.5 * snoise(vec3(2.0*p.x,4.0*p.y+0.2*t,0.4*t))*0.5;
+  		n2 += 0.25*snoise(vec3(4.0*p.x, 4.0*p.y+0.5*t,0.6*t))*0.5;
+  		n2 += 0.125*snoise(vec3(8.0*p.x,8.0*p.y,1.0*t))*0.5;
 
-  		n1=n2;
+  		// so that can easily change "fire-type"
+  		float n = n1;
 
+  		// försöker med den textur av en eldlåga typ.. går inte så bra!
+  		float alphaValue = texture2D(u_image, vTextureCoord).r ;
+  		//n = clamp(alphaValue, n, test);
+  		//n -= alphaValue;
 
+  		// färg bli mörkare ju högre upp den kommer.. alltså
+  		n = n * (1.0-p.y) * 3.5;
 
-  		// lägga på filter så liknar låga?? tröskla på något sätt..
-  		// clamp på ngt sätt.. hmmm
-  		 n1 = 1.0-abs(n1);
+  		vec3 fireColor = vec3(1.5-n, 1.0-n, 0.5-n);
+  		//vec3 fireColor2 = vec3(n); // svartvit
 
-  		//n1 = clamp(n1, 0.5,0.9);
+  		gl_FragColor = vec4(fireColor, 1.0);
 
-  		float alphaValue = 1.0;
-
-  		gl_FragColor = vec4(vec3(1.5-n1, 1.0-n1, 0.5-n1), alphaValue); // ger najs färger som stämmer hyfsat med eld. 
-  		//gl_FragColor = vec4(vec3(n2), 1.0); // för svartvit version
+  		// Look up a color from the texture.
+   		//gl_FragColor = texture2D(u_image, vTextureCoord);
+		// ---------------------------------------------------------------
+  		
 
     }
   </script>
@@ -345,12 +384,25 @@
     uniform mat4 uMVMatrix;
     uniform mat4 uPMatrix;
 
+    uniform vec2 u_resolution; 
+
     // output to the fragment shader
     varying vec2 vTextureCoord;
 
     void main(void) {
-        gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
-        vTextureCoord = aTextureCoord; // to make the noise smaller on the quad.
+    	vec2 aPos = vec2(aVertexPosition.x,aVertexPosition.y);
+
+    	// to be able to use pixelvalues instead of clipspace..
+    	// -> http://www.html5rocks.com/en/tutorials/webgl/webgl_fundamentals/
+    	vec2 zeroToOne = aPos / u_resolution;
+    	vec2 zeroToTwo = zeroToOne * 2.0;
+    	vec2 clipSpace = zeroToTwo - 1.0;
+
+    	vec3 pos = vec3(clipSpace * vec2(1,-1), aVertexPosition.z);
+    	//pos = aVertexPosition;
+
+        gl_Position = uPMatrix * uMVMatrix * vec4(pos, 1.0);
+        vTextureCoord = aTextureCoord; 
 
     }
    </script>
