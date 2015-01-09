@@ -4,11 +4,18 @@ body {
 	color: black;
 	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
   	font-size: 11px;
+  	height: 100%;
+  	width: 100%;
+  	padding:0px;
+  	margin: 0px;
 }
 
 #glcanvas {
-	margin-top: 30px;
+	margin:0px;
+	padding: 0px;	
 	border: 0px solid black;
+	height: 95vh; 
+  	width: 100vw; 
 }
 
 h1 {
