@@ -243,11 +243,13 @@ function drawScene() {
     var currentTime = (new Date).getTime(); // returns millisecunds
     gl.uniform1f(shaderProgram.uTime, 0.001 * (currentTime - startTime)); 
 
-    // set selected noise, 0.0 for the simplex, 1.0 for the flow
+    // set selected noise, 0.0 for the simplex, 1.0 for the flow, 0.5 for the simplex with abs
     var noiseFromPage = 0.0;
     if (document.getElementById("simplex").checked)
       noiseFromPage = 0.0;
-    else
+    else if (document.getElementById("simplex_abs").checked)
+      noiseFromPage = 0.5;
+    else 
       noiseFromPage = 1.0;
 
     gl.uniform1f(shaderProgram.selectedNoise, noiseFromPage);
