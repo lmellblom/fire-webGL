@@ -140,12 +140,15 @@ var vertexIndexBuffer;
 function initBuffers() {
     vertexPositionBuffer = gl.createBuffer();
 
+    var width = document.getElementById("glcanvas").width;//500.0;
+    var height = document.getElementById("glcanvas").height;//500.0;
+
     gl.bindBuffer(gl.ARRAY_BUFFER, vertexPositionBuffer);
     vertices = [
         0.0,    0.0,    0.0,
-        500.0,  0.0,    0.0,
-        500.0,  500.0,  0.0,
-        0.0,    500.0,  0.0
+        height,  0.0,    0.0,                                          
+        height,  width,  0.0,
+        0.0,    width,  0.0
     ];
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
     vertexPositionBuffer.itemSize = 3;
