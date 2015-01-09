@@ -209,156 +209,74 @@
 	}
 	// -------------------- END SIMPLEX NOISE -----------------------------
 
-
-	// -------------------- CLASSIC PERLIN NOISE -----------------------------
-	// GLSL textureless classic 3D noise "cnoise",
-	// with an RSL-style periodic variant "pnoise".
-	// Author:  Stefan Gustavson (stefan.gustavson@liu.se)
-	// Version: 2011-10-11
-	//
-	// Many thanks to Ian McEwan of Ashima Arts for the
-	// ideas for permutation and gradient selection.
-	//
-	// Copyright (c) 2011 Stefan Gustavson. All rights reserved.
-	// Distributed under the MIT license. See LICENSE file.
-	// https://github.com/ashima/webgl-noise
-
-	vec3 fade(vec3 t) {
-	  return t*t*t*(t*(t*6.0-15.0)+10.0);
-	}
-
-	// Classic Perlin noise
-	float cnoise(vec3 P)
-	{
-	  vec3 Pi0 = floor(P); // Integer part for indexing
-	  vec3 Pi1 = Pi0 + vec3(1.0); // Integer part + 1
-	  Pi0 = mod289(Pi0);
-	  Pi1 = mod289(Pi1);
-	  vec3 Pf0 = fract(P); // Fractional part for interpolation
-	  vec3 Pf1 = Pf0 - vec3(1.0); // Fractional part - 1.0
-	  vec4 ix = vec4(Pi0.x, Pi1.x, Pi0.x, Pi1.x);
-	  vec4 iy = vec4(Pi0.yy, Pi1.yy);
-	  vec4 iz0 = Pi0.zzzz;
-	  vec4 iz1 = Pi1.zzzz;
-
-	  vec4 ixy = permute(permute(ix) + iy);
-	  vec4 ixy0 = permute(ixy + iz0);
-	  vec4 ixy1 = permute(ixy + iz1);
-
-	  vec4 gx0 = ixy0 * (1.0 / 7.0);
-	  vec4 gy0 = fract(floor(gx0) * (1.0 / 7.0)) - 0.5;
-	  gx0 = fract(gx0);
-	  vec4 gz0 = vec4(0.5) - abs(gx0) - abs(gy0);
-	  vec4 sz0 = step(gz0, vec4(0.0));
-	  gx0 -= sz0 * (step(0.0, gx0) - 0.5);
-	  gy0 -= sz0 * (step(0.0, gy0) - 0.5);
-
-	  vec4 gx1 = ixy1 * (1.0 / 7.0);
-	  vec4 gy1 = fract(floor(gx1) * (1.0 / 7.0)) - 0.5;
-	  gx1 = fract(gx1);
-	  vec4 gz1 = vec4(0.5) - abs(gx1) - abs(gy1);
-	  vec4 sz1 = step(gz1, vec4(0.0));
-	  gx1 -= sz1 * (step(0.0, gx1) - 0.5);
-	  gy1 -= sz1 * (step(0.0, gy1) - 0.5);
-
-	  vec3 g000 = vec3(gx0.x,gy0.x,gz0.x);
-	  vec3 g100 = vec3(gx0.y,gy0.y,gz0.y);
-	  vec3 g010 = vec3(gx0.z,gy0.z,gz0.z);
-	  vec3 g110 = vec3(gx0.w,gy0.w,gz0.w);
-	  vec3 g001 = vec3(gx1.x,gy1.x,gz1.x);
-	  vec3 g101 = vec3(gx1.y,gy1.y,gz1.y);
-	  vec3 g011 = vec3(gx1.z,gy1.z,gz1.z);
-	  vec3 g111 = vec3(gx1.w,gy1.w,gz1.w);
-
-	  vec4 norm0 = taylorInvSqrt(vec4(dot(g000, g000), dot(g010, g010), dot(g100, g100), dot(g110, g110)));
-	  g000 *= norm0.x;
-	  g010 *= norm0.y;
-	  g100 *= norm0.z;
-	  g110 *= norm0.w;
-	  vec4 norm1 = taylorInvSqrt(vec4(dot(g001, g001), dot(g011, g011), dot(g101, g101), dot(g111, g111)));
-	  g001 *= norm1.x;
-	  g011 *= norm1.y;
-	  g101 *= norm1.z;
-	  g111 *= norm1.w;
-
-	  float n000 = dot(g000, Pf0);
-	  float n100 = dot(g100, vec3(Pf1.x, Pf0.yz));
-	  float n010 = dot(g010, vec3(Pf0.x, Pf1.y, Pf0.z));
-	  float n110 = dot(g110, vec3(Pf1.xy, Pf0.z));
-	  float n001 = dot(g001, vec3(Pf0.xy, Pf1.z));
-	  float n101 = dot(g101, vec3(Pf1.x, Pf0.y, Pf1.z));
-	  float n011 = dot(g011, vec3(Pf0.x, Pf1.yz));
-	  float n111 = dot(g111, Pf1);
-
-	  vec3 fade_xyz = fade(Pf0);
-	  vec4 n_z = mix(vec4(n000, n100, n010, n110), vec4(n001, n101, n011, n111), fade_xyz.z);
-	  vec2 n_yz = mix(n_z.xy, n_z.zw, fade_xyz.y);
-	  float n_xyz = mix(n_yz.x, n_yz.y, fade_xyz.x); 
-	  return 2.2 * n_xyz;
-	}
-	// -------------------- END CLASSIC PERLIN NOISE -----------------------------
-
-
 	// own functions to determine which noise to the fire to use, p is the position and t is the time.  
+
+	// för att få lågor, måste låga vara "längre" i y-led. därför högre x än y. 
+
 	float fireFlowNoise(vec2 p, float t){
 		vec2 g1, g2; // gradient out for the flow noise
 
-		float n = 0.5*abs(srdnoise(vec2(5.0*p.x, 2.0*p.y+0.4*t), 0.2*t, g1))-0.5;
-  		n += 0.6*abs(srdnoise(vec2(3.0*p.x, 1.0*p.y), 0.1, g2));
-  		n += abs(srdnoise(vec2(2.0*p.x, p.y+0.2*t), 0.2+g1.x*0.1, g2));
-  		//n += 0.3*abs(srdnoise(vec2(10.0*p.x, 7.0*p.y), g2.y*0.2+0.2*t, g1));
-  		n += (srdnoise(vec2(p.x, p.y), 0.1*t, g1));
-/*
-  		float n = abs(srdnoise(vec2(p.x,p.y+0.7*t),0.2*t , g1));
-  		n += 0.5 * abs(srdnoise(vec2(2.0*p.x,2.0*p.y+0.4*t),0.1*t,g2));
-  		n += 0.25* abs(srdnoise(vec2(4.0*p.x, 4.0*p.y+0.2*t),0.2*t+0.3*g2.y,g1));
-  */	//n += 0.125*abs(srdnoise(vec2(8.0*p.x,8.0*p.y+0.8*t),0.4*t,g1));
+		float n = 0.32*(srdnoise(vec2(8.0*p.x, 2.0*p.y+0.2*t), 0.1*t, g1)); // -0.3 för längre lågor, +ett tal * tiden för att animera uppåt, tal * t är för rotaionen
+		n += 0.5*(srdnoise(vec2(32.0*p.x, 4.0*p.y+0.3*t), 0.2*g1.x, g1));
+  		n += 0.8 * (srdnoise(vec2(16.0*p.x+0.1*t, p.y+0.2*t), 0.15*t, g1))+0.3;
 
-  		n = 1.0-abs(n);
+  		//n += abs(srdnoise(vec2(2.0*p.x, p.y+0.2*t), 0.2+g1.x*0.1, g2));
+  		//n += (srdnoise(vec2(p.x, p.y), 0.1*t, g1));
+
+
+  		n = 1.0-abs(n); // göra lite skarpare
 
   		return n;
 	}
 	float fireSimplexNoise(vec2 p, float t){
-		float n = snoise(vec3(p.x,p.y+0.7*t,0.3*t))*0.5+0.5;
-		n += 0.5 * snoise(vec3(2.0*p.x,4.0*p.y+0.2*t,0.4*t))*0.5;
-		n += 0.25*snoise(vec3(4.0*p.x, 4.0*p.y+0.5*t,0.6*t))*0.5;
-		n += 0.125*snoise(vec3(8.0*p.x,8.0*p.y,1.0*t))*0.5;
+		float n = abs(snoise(vec3(8.0*p.x,p.y+0.2*t,0.2*t)))*0.5+0.2;
+  		n += 0.5 * abs(snoise(vec3(32.0*p.x,4.0*p.y+0.2*t,0.2*t)));
+  		n += 0.25 * abs(snoise(vec3(64.0*p.x, 8.0*p.y+0.1*t,0.4*t)));
 
-		return n*0.8;
+		return 1.0-abs(n);
 	}
 
 	float fireSimplexNoise2(vec2 p, float t){
-		float n = snoise(vec3(p.x,p.y+0.5*t,0.3*t))*0.5+0.5;
-  		n += 0.5 * abs(snoise(vec3(4.0*p.x,2.0*p.y+0.1*t,0.3*t)));
-  		n += 0.25*abs(snoise(vec3(8.0*p.x, 4.0*p.y+0.4*t,0.4*t)));
-  		n += 0.125*abs(snoise(vec3(16.0*p.x,8.0*p.y,1.0*t)));
+		// när man plussar på y-led in i noisefunktionen, så anger man hur mkt den ska animera i höjdled. för att göra mer lågaktiga, måste 
+		// x och y vara "uttänjda elr vad man säger". alltså mer i "rutor" i x-led och därmer blir smalare typ. 
+		// om tar abs mellan varje så blir det lite skarpare. 
+
+		float n = abs(snoise(vec3(8.0*p.x,p.y+0.2*t,0.2*t)))*0.5+0.2;
+  		n += 0.5 * abs(snoise(vec3(32.0*p.x,4.0*p.y+0.2*t,0.2*t)));
+  		n += 0.25 * abs(snoise(vec3(64.0*p.x, 8.0*p.y+0.1*t,0.4*t)));
   	
-  		return n*0.8;
+  		return n;//1.0-abs(n);
 	}
 
-
     void main(void) {
-        vec2 p = vTextureCoord * 1.0;
+    	/* TODO för att göra elden mer verklighetstrogen
+    	- Skärpan i detaljerna
+    	- Animeringen i höjdled
+    	- Hur mycket elden fladdrar i sidled
+    	- Hur fort lågorna byter utseende
+    	*/
+
+        vec2 p = vTextureCoord * 1.0; // point in space
+
         float t = uTime;
+
+        // alpha value
+        float alpha = 1.0;
+
 		
   		// which fire noise to use, om selected noise är 1.0, flow. 0.0 first simplex, else simplex 2. 
   		float n = ( selectedNoise == 1.0 ?  fireFlowNoise(p,t) : (selectedNoise==0.0 ? fireSimplexNoise(p,t) : fireSimplexNoise2(p,t)) ) ;
 
-  		// försöker med den textur av en eldlåga typ.. går inte så bra!
-  		//float alphaValue = texture2D(u_image, vTextureCoord).r ;
-  		//n = clamp(alphaValue, n, test);
+  		// ju högre upp, desto mindre lågor, tona bort då. 
+  		float distortionScale = 3.0;
+  		float distortionBias = 0.4;
+  		float perturb = ( (1.0-p.y) * distortionScale) + distortionBias;
+  		n = n * perturb + (1.0-p.y);
 
-  		// färg bli mörkare ju högre upp den kommer.. alltså
-  		n = n * (1.0-p.y) * 4.0;
-
-  		// försöka tröskla lågorna så de blir skarpare!!
+  		// göra lågorna skarpare
 
   		// different styles of firecolors.. 
   		vec3 fireColor = vec3(1.5-n, 1.0-n, 0.5-n);
-  		vec3 fireColor2 = vec3(n); // svartvit
-
-  		float alpha = ( all(lessThan(fireColor,vec3(0.3)))  ? 0.3 : 1.0 );
-  		alpha = 1.0;
 
   		gl_FragColor = vec4(fireColor, alpha);
 		// ---------------------------------------------------------------
@@ -406,9 +324,9 @@
   </canvas>
   <br>
   <form>
-  	<input type="radio" name="noise" id="simplex" value="simplex" checked>Simplex  
+  	<input type="radio" name="noise" id="simplex" value="simplex">Simplex  
   	<input type="radio" name="noise" id="simplex_abs" value="simplex_abs">Simplex with abs
-  	<input type="radio" name="noise" id="flow" value="flow">Flow
+  	<input type="radio" name="noise" id="flow" value="flow" checked>Flow
   </form> 
 </body>
 
