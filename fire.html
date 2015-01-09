@@ -21,6 +21,7 @@
     // input from vertex shader
   	varying vec2 vTextureCoord;
   	uniform float uTime; 
+  	uniform float selectedNoise;
 
   	// our texture
 	uniform sampler2D u_image;
@@ -303,11 +304,15 @@
 		vec2 g1, g2; // gradient out for the flow noise
 
 		float n = 0.5*abs(srdnoise(vec2(5.0*p.x, 2.0*p.y+0.4*t), 0.2*t, g1))-0.5;
-  		n += 0.5*abs(srdnoise(vec2(3.0*p.x, 1.0*p.y), 0.1, g2));
+  		n += 0.6*abs(srdnoise(vec2(3.0*p.x, 1.0*p.y), 0.1, g2));
   		n += abs(srdnoise(vec2(2.0*p.x, p.y+0.2*t), 0.2+g1.x*0.1, g2));
-  		n += 0.3*abs(srdnoise(vec2(10.0*p.x, 7.0*p.y), g2.y*0.2+0.2*t, g1));
-
-  		
+  		//n += 0.3*abs(srdnoise(vec2(10.0*p.x, 7.0*p.y), g2.y*0.2+0.2*t, g1));
+  		n += (srdnoise(vec2(p.x, p.y), 0.1*t, g1));
+/*
+  		float n = abs(srdnoise(vec2(p.x,p.y+0.7*t),0.2*t , g1));
+  		n += 0.5 * abs(srdnoise(vec2(2.0*p.x,2.0*p.y+0.4*t),0.1*t,g2));
+  		n += 0.25* abs(srdnoise(vec2(4.0*p.x, 4.0*p.y+0.2*t),0.2*t+0.3*g2.y,g1));
+  */	//n += 0.125*abs(srdnoise(vec2(8.0*p.x,8.0*p.y+0.8*t),0.4*t,g1));
 
   		n = 1.0-abs(n);
 
@@ -316,9 +321,10 @@
 
 	float fireSimplexNoise(vec2 p, float t){
 		float n = snoise(vec3(p.x,p.y+0.7*t,0.3*t))*0.5+0.5;
-  		n += 0.5 * snoise(vec3(2.0*p.x,4.0*p.y+0.2*t,0.4*t))*0.5;
+  		n += 0.5 * snoise(vec3(2.0*p.x,2.0*p.y+0.2*t,0.4*t))*0.5;
   		n += 0.25*snoise(vec3(4.0*p.x, 4.0*p.y+0.5*t,0.6*t))*0.5;
   		n += 0.125*snoise(vec3(8.0*p.x,8.0*p.y,1.0*t))*0.5;
+  		
   		n = 1.0-abs(n);
 
   		return n;
@@ -326,17 +332,15 @@
 
 
     void main(void) {
-        vec2 g1, g2; // gradient out for the flow noise
         vec2 p = vTextureCoord * 1.0;
         float t = uTime;
 		
   		// which fire noise to use
-  		float n = fireFlowNoise(p,t);
+  		float n = ( selectedNoise == 0.0 ?  fireSimplexNoise(p,t) : fireFlowNoise(p,t) ) ;
 
   		// försöker med den textur av en eldlåga typ.. går inte så bra!
   		//float alphaValue = texture2D(u_image, vTextureCoord).r ;
   		//n = clamp(alphaValue, n, test);
-  		//n -= alphaValue;
 
   		// färg bli mörkare ju högre upp den kommer.. alltså
   		n = n * (1.0-p.y) * 4.0;
@@ -344,10 +348,13 @@
   		// försöka tröskla lågorna så de blir skarpare!!
 
   		// different styles of firecolors.. 
-  		vec3 fireColor = vec3(1.6-n, 1.0-n, 0.5-n);
+  		vec3 fireColor = vec3(1.5-n, 1.0-n, 0.5-n);
   		//vec3 fireColor2 = vec3(n); // svartvit
 
-  		gl_FragColor = vec4(fireColor, 1.0);
+  		float alpha = ( all(lessThan(fireColor,vec3(0.3)))  ? 0.3 : 1.0 );
+  		alpha = 1.0;
+
+  		gl_FragColor = vec4(fireColor, alpha);
 		// ---------------------------------------------------------------
     }
   </script>
@@ -391,6 +398,11 @@
   <canvas id="glcanvas" width="500" height="500">
     Your browser doesn't appear to support the HTML5 <code>&lt;canvas&gt;</code> element.
   </canvas>
+  <br>
+  <form>
+  	<input type="radio" name="noise" id="simplex" value="simplex" checked>Simplex  
+  	<input type="radio" name="noise" id="flow" value="flow">Flow
+  </form> 
 </body>
 
 </html> 

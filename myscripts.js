@@ -101,6 +101,9 @@ function initShaders() {
   shaderProgram.resolutionLocation = gl.getUniformLocation(shaderProgram, "u_resolution");
   gl.uniform2f(shaderProgram.resolutionLocation, document.getElementById("glcanvas").width, document.getElementById("glcanvas").height);
 
+  // hämta radio-button svaren.. typ.
+  shaderProgram.selectedNoise = gl.getUniformLocation(shaderProgram, "selectedNoise");
+
   shaderProgram.uTime = gl.getUniformLocation(shaderProgram, "uTime");
 
 }
@@ -173,6 +176,10 @@ function initBuffers() {
 			new Uint16Array(vertexIndices), gl.STATIC_DRAW);
     vertexIndexBuffer.itemSize = 1;
     vertexIndexBuffer.numItems = 6;
+}
+
+function initBuffers2(){
+    vertexPositionBuffer = gl.createBuffer();
 
 }
 
@@ -195,9 +202,9 @@ function drawScene() {
     gl.vertexAttribPointer(shaderProgram.aTextureCoord, vertexCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
     // set texture image
-    gl.activeTexture(gl.TEXTURE0);
-    gl.bindTexture(gl.TEXTURE_2D, TextureRGBA);
-    gl.uniform1i(shaderProgram.uSampler, 0); // Texture unit 0
+    //gl.activeTexture(gl.TEXTURE0);
+    //gl.bindTexture(gl.TEXTURE_2D, TextureRGBA);
+    //gl.uniform1i(shaderProgram.uSampler, 0); // Texture unit 0
 
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, vertexIndexBuffer);
 
@@ -206,9 +213,45 @@ function drawScene() {
     gl.drawElements(gl.TRIANGLES, vertexIndexBuffer.numItems,
 			gl.UNSIGNED_SHORT, 0);
 
+    /*
+    // TESTAR ATT RITA EN TILL.... HMMM -------------------------------------------
+    mat4.translate(mvMatrix, [0.1, 0.2, -0.1]);
+
+    // init the buffer for the square
+    gl.bindBuffer(gl.ARRAY_BUFFER, vertexPositionBuffer);
+    gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, vertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+    
+    //set the texture coords
+    gl.bindBuffer(gl.ARRAY_BUFFER, vertexCoordBuffer);
+    gl.vertexAttribPointer(shaderProgram.aTextureCoord, vertexCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+    // set texture image
+    //gl.activeTexture(gl.TEXTURE0);
+    //gl.bindTexture(gl.TEXTURE_2D, TextureRGBA);
+    //gl.uniform1i(shaderProgram.uSampler, 0); // Texture unit 0
+
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, vertexIndexBuffer);
+
+    setMatrixUniforms();
+    // Draw the single quad
+    gl.drawElements(gl.TRIANGLES, vertexIndexBuffer.numItems,
+      gl.UNSIGNED_SHORT, 0);
+    // ------------------------------------------------------------------------------
+    */
+
     // check what time it is and set as uniform variable for the animation
     var currentTime = (new Date).getTime(); // returns millisecunds
     gl.uniform1f(shaderProgram.uTime, 0.001 * (currentTime - startTime)); 
+
+    // set selected noise, 0.0 for the simplex, 1.0 for the flow
+    var noiseFromPage = 0.0;
+    if (document.getElementById("simplex").checked)
+      noiseFromPage = 0.0;
+    else
+      noiseFromPage = 1.0;
+
+    gl.uniform1f(shaderProgram.selectedNoise, noiseFromPage);
+    
 
 }
 
@@ -259,6 +302,11 @@ function webGLStart() {
 
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
     gl.enable(gl.DEPTH_TEST);
+
+    // om lägga flera lager typ 
+    gl.disable(gl.DEPTH_TEST);
+    gl.enable(gl.BLEND);
+    gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
 
     tick(); 
 }
