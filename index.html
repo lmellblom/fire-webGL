@@ -3,7 +3,7 @@
 <html>
 
 <head>
-  <title>Fire with webGL</title>
+  <title>🔥 Procedural fire with webGL</title>
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
 
   <!-- FONTS-->
@@ -25,6 +25,9 @@
 
   	// our texture
 	uniform sampler2D u_image;
+
+
+	#define fireRGB vec3(1.5,1.0,0.5)
 
   	// --------------- FLOW NOISE --------------------------------
 	// Helper constants
@@ -216,9 +219,9 @@
 	float fireFlowNoise(vec2 p, float t){
 		vec2 g1, g2; // gradient out for the flow noise
 
-		float n = 0.32*(srdnoise(vec2(8.0*p.x, 2.0*p.y+0.2*t), 0.1*t, g1)); // -0.3 för längre lågor, +ett tal * tiden för att animera uppåt, tal * t är för rotaionen
-		n += 0.5*(srdnoise(vec2(32.0*p.x, 4.0*p.y+0.3*t), 0.2*g1.x, g1));
-  		n += 0.8 * (srdnoise(vec2(16.0*p.x+0.1*t, p.y+0.2*t), 0.15*t, g1))+0.3;
+		float n = 0.32*abs(srdnoise(vec2(8.0*p.x, 2.0*p.y+0.7*t), 0.1*t, g1)); // -0.3 för längre lågor, +ett tal * tiden för att animera uppåt, tal * t är för rotaionen
+		n += 0.5*abs(srdnoise(vec2(32.0*p.x, 4.0*p.y+0.3*t), 0.2*g1.x, g1));
+  		n += 0.8 * abs(srdnoise(vec2(16.0*p.x+0.1*t, p.y+0.2*t), 0.15*t, g1))+0.3;
 
   		//n += abs(srdnoise(vec2(2.0*p.x, p.y+0.2*t), 0.2+g1.x*0.1, g2));
   		//n += (srdnoise(vec2(p.x, p.y), 0.1*t, g1));
@@ -229,9 +232,9 @@
   		return n;
 	}
 	float fireSimplexNoise(vec2 p, float t){
-		float n = abs(snoise(vec3(8.0*p.x,p.y+0.2*t,0.2*t)))*0.5+0.2;
-  		n += 0.5 * abs(snoise(vec3(32.0*p.x,4.0*p.y+0.2*t,0.2*t)));
-  		n += 0.25 * abs(snoise(vec3(64.0*p.x, 8.0*p.y+0.1*t,0.4*t)));
+		float n = (snoise(vec3(8.0*p.x,p.y+0.2*t,0.2*t)))*0.5+0.2;
+  		n += 0.5 * (snoise(vec3(32.0*p.x,4.0*p.y+0.2*t,0.2*t)));
+  		n += 0.25 * (snoise(vec3(64.0*p.x, 8.0*p.y+0.1*t,0.4*t)));
 
 		return 1.0-abs(n);
 	}
@@ -262,7 +265,6 @@
 
         // alpha value
         float alpha = 1.0;
-
 		
   		// which fire noise to use, om selected noise är 1.0, flow. 0.0 first simplex, else simplex 2. 
   		float n = ( selectedNoise == 1.0 ?  fireFlowNoise(p,t) : (selectedNoise==0.0 ? fireSimplexNoise(p,t) : fireSimplexNoise2(p,t)) ) ;
@@ -270,13 +272,13 @@
   		// ju högre upp, desto mindre lågor, tona bort då. 
   		float distortionScale = 3.0;
   		float distortionBias = 0.4;
-  		float perturb = ( (1.0-p.y) * distortionScale) + distortionBias;
+  		float perturb = ( (1.0-pow(p.y,2.0)) * distortionScale) + distortionBias;
   		n = n * perturb + (1.0-p.y);
 
   		// göra lågorna skarpare
 
   		// different styles of firecolors.. 
-  		vec3 fireColor = vec3(1.5-n, 1.0-n, 0.5-n);
+  		vec3 fireColor = vec3(fireRGB.r-n, fireRGB.g-n, fireRGB.b-n);
 
   		gl_FragColor = vec4(fireColor, alpha);
 		// ---------------------------------------------------------------
