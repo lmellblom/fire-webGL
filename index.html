@@ -219,9 +219,13 @@
 	float fireFlowNoise(vec2 p, float t){
 		vec2 g1, g2; // gradient out for the flow noise
 
-		float n = 0.32*abs(srdnoise(vec2(8.0*p.x, 2.0*p.y+0.7*t), 0.1*t, g1)); // -0.3 för längre lågor, +ett tal * tiden för att animera uppåt, tal * t är för rotaionen
+		// ju högre upp noise är, desto mer ska det flyttas i sidled.. alltså plussa på x.  beroende på y.
+		float sideWind =0.2* t  ;//0.4+p.y*t;
+		float sidew = 0.2*t;// + p.y*p.y;
+
+		float n = 0.32*abs(srdnoise(vec2(8.0*p.x, 2.0*p.y+0.4*t), 0.1*t, g1)); // -0.3 för längre lågor, +ett tal * tiden för att animera uppåt, tal * t är för rotaionen
 		n += 0.5*abs(srdnoise(vec2(32.0*p.x, 4.0*p.y+0.3*t), 0.2*g1.x, g1));
-  		n += 0.8 * abs(srdnoise(vec2(16.0*p.x+0.1*t, p.y+0.2*t), 0.15*t, g1))+0.3;
+  		n += 0.8 * abs(srdnoise(vec2(16.0*p.x+sideWind, p.y), sidew, g1))+0.3;
 
   		//n += abs(srdnoise(vec2(2.0*p.x, p.y+0.2*t), 0.2+g1.x*0.1, g2));
   		//n += (srdnoise(vec2(p.x, p.y), 0.1*t, g1));
@@ -265,14 +269,17 @@
 
         // alpha value
         float alpha = 1.0;
-		
+
+        // beroende på vilket y-värde, högre t ju högre upp??
+        //t = t + (1.0-p.y)*2.0;
+
   		// which fire noise to use, om selected noise är 1.0, flow. 0.0 first simplex, else simplex 2. 
   		float n = ( selectedNoise == 1.0 ?  fireFlowNoise(p,t) : (selectedNoise==0.0 ? fireSimplexNoise(p,t) : fireSimplexNoise2(p,t)) ) ;
 
   		// ju högre upp, desto mindre lågor, tona bort då. 
   		float distortionScale = 3.0;
   		float distortionBias = 0.4;
-  		float perturb = ( (1.0-pow(p.y,2.0)) * distortionScale) + distortionBias;
+  		float perturb = ( (1.0-p.y) * distortionScale) + distortionBias;
   		n = n * perturb + (1.0-p.y);
 
   		// göra lågorna skarpare
