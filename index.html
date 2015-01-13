@@ -7,7 +7,8 @@
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
 
   <!-- FONTS-->
-  <link href='http://fonts.googleapis.com/css?family=Josefin+Sans' rel='stylesheet' type='text/css'>
+  <link href='http://fonts.googleapis.com/css?family=Give+You+Glory' rel='stylesheet' type='text/css'>
+  <link href='http://fonts.googleapis.com/css?family=Lato:300' rel='stylesheet' type='text/css'>
   <link rel="stylesheet" href="style.css">
 
   <script type="text/javascript" src="glMatrix.js"></script> 
@@ -18,11 +19,13 @@
     precision highp float;
     #endif
 
-    // input from vertex shader
+    // inputs
   	varying vec2 vTextureCoord;
   	uniform float uTime; 
   	uniform float selectedNoise;
   	uniform bool addEffect; 
+  	uniform float effectWidth;
+  	uniform float effectHeight;
 
   	// our texture
 	uniform sampler2D u_image;
@@ -252,6 +255,18 @@
   		//return n4;
 	}
 
+	// denna ser ok ut! slarva till den ovan isånnafall.. 
+	float fireFlowNoise2(vec2 p, float t){
+		vec2 g1, g2; // gradient out for the flow noise
+
+		float n = 0.32*abs(srdnoise(vec2(8.0*p.x, 2.0*p.y+0.7*t), 0.1*t, g1)); // -0.3 för längre lågor, +ett tal * tiden för att animera uppåt, tal * t är för rotaionen
+		n += 0.5*abs(srdnoise(vec2(16.0*p.x, 4.0*p.y+0.3*t), 0.2*g1.x, g1));
+  		n += 0.8 * abs(srdnoise(vec2(8.0*p.x+0.1*t, p.y+0.2*t), 0.15*t, g1))+0.3;
+  		n = 1.0-abs(n); // göra lite skarpare
+
+  		return n;
+	}
+
 	float fireSimplexNoise(vec2 p, float t){
 		float n = abs(snoise(vec3(4.0*p.x,p.y+0.3*t,0.2*t)))*0.5+0.2;
   		n += 0.5 * (snoise(vec3(16.0*p.x,4.0*p.y+0.6*t,0.3*t)));
@@ -278,10 +293,12 @@
 	}
 
 	float circleEffect(vec2 p){
-		vec2 tileSize = vec2(0.5/1.0, 0.5/1.0);
+		vec2 tileSize = vec2(1.0/effectWidth, 1.0/effectHeight);  // hur många olika rutor som ska göras.. beror på användaren
+
 		vec2 p2 = vec2(floor(p / tileSize)); // the new coords (om vill använda de för något annat, skriv då out vec2 p2 så kan den skickas tillbaka typ!!)
 		vec2 tile_coord = abs(mod(p/tileSize, 1.0)-0.5); 		// the coordinates of each tile, value between [-1,1] but absolut belopp, så [0,1]
 		float effect = (tile_coord.x*tile_coord.x+tile_coord.y*tile_coord.y)*6.0-0.1; // make a circle, 
+
 
 		return effect;
 	}
@@ -295,14 +312,13 @@
     	*/
 
         vec2 p = vTextureCoord * 1.0; // point in space
-
         float t = uTime;
 
         // alpha value
         float alpha = 1.0;
 
   		// which fire noise to use, om selected noise är 1.0, flow. 0.0 first simplex, else simplex 2. 
-  		float n = ( selectedNoise == 1.0 ?  fireFlowNoise(p,t) : (selectedNoise==0.0 ? fireSimplexNoise(p,t) : fireSimplexNoise2(p,t)) ) ;
+  		float n = ( selectedNoise == 1.0 ?  fireFlowNoise2(p,t) : (selectedNoise==0.0 ? fireSimplexNoise(p,t) : fireSimplexNoise2(p,t)) ) ;
 
   		// ju högre upp i y-led vi kommer, desto mer ska lågorna tyna bort. 
   		float distortionScale = 4.0;
@@ -312,9 +328,11 @@
 
   		// cut ut the effect of a cirle if the box on the website is checked. 
  		n = (addEffect ? n+circleEffect(p) : n); 
+ 		//n = n*(1.0-p.y*p.y);
+
+ 		//n = mix(n, 1.0-p.y*p.y, 0.5);
 
   		// göra lågorna skarpare
-  		//n = n+ fireFlowNoise(4.0*p,t);
 
   		// different styles of firecolors.. 
   		vec3 fireColor = vec3(fireRGB.r-n, fireRGB.g-n, fireRGB.b-n);
@@ -369,7 +387,7 @@
 </div>
 
   <div id="choices">
-  	<h1>Fire in webGL</h1>
+  	<h1>Procedural Fire</h1>
   <form>
   	<p class="boldHeader">Noise: </p>
   	<input type="radio" name="noise" id="simplex" value="simplex">Simplex 1  
@@ -377,7 +395,22 @@
   	<input type="radio" name="noise" id="flow" value="flow" checked>Flow
   	<br><br>
   	<p class="boldHeader">Effects: </p>
-  	<input type="checkbox" name="addEffect" id="addEffect" value="addEffect">Cut out circle in the fire
+  	<input type="checkbox" name="addEffect" id="addEffect" value="addEffect">Cut out circle in the fire <br>
+  	Number in width: 
+  	<select id="numberWidth">
+		<option value="1.0" selected>1</option>
+		<option value="2.0">2</option>
+		<option value="3.0">3</option>
+		<option value="4.0">4</option>
+	</select> <br>
+	Number in height: 
+	 <select id="numberHeight">
+		<option value="1.0" selected>1</option>
+		<option value="2.0">2</option>
+		<option value="3.0">3</option>
+		<option value="4.0">4</option>
+	</select>
+
   </form> 
   </div>
 </body>

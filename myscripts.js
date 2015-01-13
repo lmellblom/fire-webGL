@@ -103,8 +103,9 @@ function initShaders() {
 
   // hämta radio-button svaren.. typ.
   shaderProgram.selectedNoise = gl.getUniformLocation(shaderProgram, "selectedNoise");
-
   shaderProgram.addEffect = gl.getUniformLocation(shaderProgram, "addEffect");
+  shaderProgram.effectWidth = gl.getUniformLocation(shaderProgram, "effectWidth");
+  shaderProgram.effectHeight = gl.getUniformLocation(shaderProgram, "effectHeight");
 
   shaderProgram.uTime = gl.getUniformLocation(shaderProgram, "uTime");
 
@@ -222,6 +223,7 @@ function drawScene() {
     var currentTime = (new Date).getTime(); // returns millisecunds
     gl.uniform1f(shaderProgram.uTime, 0.001 * (currentTime - startTime)); 
 
+    // get user inputs --------------------------------------------------------------------------
     // set selected noise, 0.0 for the simplex, 1.0 for the flow, 0.5 for the simplex with abs
     var noiseFromPage = 0.0;
     if (document.getElementById("simplex").checked)
@@ -231,11 +233,18 @@ function drawScene() {
     else 
       noiseFromPage = 1.0;
 
+    var e = document.getElementById("numberWidth");
+    var nWidth = e.options[e.selectedIndex].value;
+    e = document.getElementById("numberHeight");
+    var nHeight = e.options[e.selectedIndex].value;
+
+
     gl.uniform1f(shaderProgram.selectedNoise, noiseFromPage);
-
     gl.uniform1i(shaderProgram.addEffect, document.getElementById("addEffect").checked);
+    gl.uniform1f(shaderProgram.effectWidth, nWidth);
+    gl.uniform1f(shaderProgram.effectHeight, nHeight);
 
-    
+    // end user input -------------------------------------------------------------------------
 
 }
 

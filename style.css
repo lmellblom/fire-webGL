@@ -2,8 +2,8 @@ body {
 	text-align: center;
 	background-color: black;
 	color: white;
-	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-  	font-size: 11px;
+	font-family: 'Lato', sans-serif !important;
+  	font-size: 12px;
   	height: 100%;
   	width: 100%;
   	padding:0px;
@@ -22,12 +22,16 @@ body {
 }
 
 h1 {
-	text-transform: uppercase;
+	/*text-transform: uppercase;*/
+	font-family: 'Give You Glory', cursive;
+	font-size: 40px;
 }
 
 .boldHeader {
 	font-weight: bold;
 	color: #FFB759;
+	font-family: 'Lato', sans-serif !important;
+	text-transform: uppercase;
 }
 
 #theCanvas{
