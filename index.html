@@ -3,7 +3,7 @@
 <html>
 
 <head>
-  <title>🔥 Procedural fire with webGL</title>
+  <title>I see fire 🔥</title>
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
 
   <!-- FONTS-->
@@ -22,6 +22,7 @@
   	varying vec2 vTextureCoord;
   	uniform float uTime; 
   	uniform float selectedNoise;
+  	uniform bool addEffect; 
 
   	// our texture
 	uniform sampler2D u_image;
@@ -219,26 +220,42 @@
 	float fireFlowNoise(vec2 p, float t){
 		vec2 g1, g2; // gradient out for the flow noise
 
-		// ju högre upp noise är, desto mer ska det flyttas i sidled.. alltså plussa på x.  beroende på y.
-		float sideWind =0.2* t  ;//0.4+p.y*t;
-		float sidew = 0.2*t;// + p.y*p.y;
+		// different kind of noise. add upp the different noise functions, different octavs to get a more finer noise. 
+		float n = 0.5*srdnoise(vec2(4.0*p.x,2.0*p.y+0.5*t) , 0.1*t , g1); // mellan 0 -> 1 nu tror jag.. men vill inte ha det för tilfället. 
+		n = mix(n, (0.5*srdnoise(vec2(8.0*p.x, 2.0*p.y + 0.3*t) , 0.6*t, g2)), 0.8)+0.2;
+		//n += 0.5*srdnoise(vec2(8.0*p.x, 2.0*p.y + 0.3*t) , 0.6*t, g2);
+		float n1 = 0.4*(srdnoise(vec2(16.0*p.x+0.1*t, 2.0*p.y+0.2*t), 0.2*t, g1))+0.5;
 
-		float n = 0.32*abs(srdnoise(vec2(8.0*p.x, 2.0*p.y+0.4*t), 0.1*t, g1)); // -0.3 för längre lågor, +ett tal * tiden för att animera uppåt, tal * t är för rotaionen
-		n += 0.5*abs(srdnoise(vec2(32.0*p.x, 4.0*p.y+0.3*t), 0.2*g1.x, g1));
-  		n += 0.8 * abs(srdnoise(vec2(16.0*p.x+sideWind, p.y), sidew, g1))+0.3;
+		//return abs(n1) + n; // 1.0-n*n, n, n+n
+
+		float n2 = srdnoise(vec2(8.0*p.x+0.3*t,2.0*p.y+0.2*t), 0.15*t, g1); 
+
+		// MIX kan nog vara en bra ide för att ta ihop lite olika, clamp, smoothstep
+
+		float n3 = mix(abs(n+n1),abs(n2),0.5);
+
+
+		return 1.0-abs(n+n1);
+
+
+
+		float n4 = 0.32*abs(srdnoise(vec2(8.0*p.x, 2.0*p.y+0.4*t), 0.1*t, g1)); // -0.3 för längre lågor, +ett tal * tiden för att animera uppåt, tal * t är för rotaionen
+		n4 += 0.5*abs(srdnoise(vec2(32.0*p.x, 4.0*p.y+0.3*t), 0.2*g1.x, g1));
+  		n4 += 0.8 * (srdnoise(vec2(16.0*p.x+0.2*t, p.y), 0.2*t, g1))+0.4;
 
   		//n += abs(srdnoise(vec2(2.0*p.x, p.y+0.2*t), 0.2+g1.x*0.1, g2));
   		//n += (srdnoise(vec2(p.x, p.y), 0.1*t, g1));
 
 
-  		n = 1.0-abs(n); // göra lite skarpare
+  		n4 = 1.0-abs(n4); // göra lite skarpare
 
-  		return n;
+  		//return n4;
 	}
+
 	float fireSimplexNoise(vec2 p, float t){
-		float n = (snoise(vec3(8.0*p.x,p.y+0.2*t,0.2*t)))*0.5+0.2;
-  		n += 0.5 * (snoise(vec3(32.0*p.x,4.0*p.y+0.2*t,0.2*t)));
-  		n += 0.25 * (snoise(vec3(64.0*p.x, 8.0*p.y+0.1*t,0.4*t)));
+		float n = abs(snoise(vec3(4.0*p.x,p.y+0.3*t,0.2*t)))*0.5+0.2;
+  		n += 0.5 * (snoise(vec3(16.0*p.x,4.0*p.y+0.6*t,0.3*t)));
+  		n += 0.25 * (snoise(vec3(32.0*p.x+0.4*t, 8.0*p.y+0.7*t,0.4*t)));
 
 		return 1.0-abs(n);
 	}
@@ -248,11 +265,25 @@
 		// x och y vara "uttänjda elr vad man säger". alltså mer i "rutor" i x-led och därmer blir smalare typ. 
 		// om tar abs mellan varje så blir det lite skarpare. 
 
-		float n = abs(snoise(vec3(8.0*p.x,p.y+0.2*t,0.2*t)))*0.5+0.2;
-  		n += 0.5 * abs(snoise(vec3(32.0*p.x,4.0*p.y+0.2*t,0.2*t)));
-  		n += 0.25 * abs(snoise(vec3(64.0*p.x, 8.0*p.y+0.1*t,0.4*t)));
+		float n = abs(snoise(vec3(4.0*p.x,p.y+0.2*t,0.2*t)))*0.5-0.3;
+  		n += 0.5 * abs(snoise(vec3(16.0*p.x,4.0*p.y+0.6*t,0.2*t)));
+  		n += 0.25 * abs(snoise(vec3(32.0*p.x, 8.0*p.y+0.1*t,0.4*t)));
+
+  		float n1 = 0.5*snoise(vec3(32.0*p.x, 8.0*p.y+0.1*t,0.3*t));
+  		n1 = 1.0 - abs(n1);
+  		n1 += 0.3 * snoise(vec3(16.0*p.x, 8.0*p.y+0.6*t, 0.5*t));
+
   	
-  		return n;//1.0-abs(n);
+  		return mix(n1,n,0.5);//1.0-abs(n);
+	}
+
+	float circleEffect(vec2 p){
+		vec2 tileSize = vec2(0.5/1.0, 0.5/1.0);
+		vec2 p2 = vec2(floor(p / tileSize)); // the new coords (om vill använda de för något annat, skriv då out vec2 p2 så kan den skickas tillbaka typ!!)
+		vec2 tile_coord = abs(mod(p/tileSize, 1.0)-0.5); 		// the coordinates of each tile, value between [-1,1] but absolut belopp, så [0,1]
+		float effect = (tile_coord.x*tile_coord.x+tile_coord.y*tile_coord.y)*6.0-0.1; // make a circle, 
+
+		return effect;
 	}
 
     void main(void) {
@@ -270,19 +301,20 @@
         // alpha value
         float alpha = 1.0;
 
-        // beroende på vilket y-värde, högre t ju högre upp??
-        //t = t + (1.0-p.y)*2.0;
-
   		// which fire noise to use, om selected noise är 1.0, flow. 0.0 first simplex, else simplex 2. 
   		float n = ( selectedNoise == 1.0 ?  fireFlowNoise(p,t) : (selectedNoise==0.0 ? fireSimplexNoise(p,t) : fireSimplexNoise2(p,t)) ) ;
 
-  		// ju högre upp, desto mindre lågor, tona bort då. 
-  		float distortionScale = 3.0;
-  		float distortionBias = 0.4;
+  		// ju högre upp i y-led vi kommer, desto mer ska lågorna tyna bort. 
+  		float distortionScale = 4.0;
+  		float distortionBias = 0.0;
   		float perturb = ( (1.0-p.y) * distortionScale) + distortionBias;
-  		n = n * perturb + (1.0-p.y);
+  		n = n * perturb; 
+
+  		// cut ut the effect of a cirle if the box on the website is checked. 
+ 		n = (addEffect ? n+circleEffect(p) : n); 
 
   		// göra lågorna skarpare
+  		//n = n+ fireFlowNoise(4.0*p,t);
 
   		// different styles of firecolors.. 
   		vec3 fireColor = vec3(fireRGB.r-n, fireRGB.g-n, fireRGB.b-n);
@@ -320,6 +352,8 @@
         gl_Position = uPMatrix * uMVMatrix * vec4(pos, 1.0);
         vTextureCoord = aTextureCoord; 
     }
+
+
    </script>
    <!-- - - - - - - - - - - - - - - - - -->
 
@@ -328,15 +362,24 @@
 </head>
 
 <body onload="webGLStart();">
-  <canvas id="glcanvas" width="500" height="500">
+	<div id="theCanvas">
+  <canvas id="glcanvas" width="400" height="400">
     Your browser doesn't appear to support the HTML5 <code>&lt;canvas&gt;</code> element.
   </canvas>
-  <br>
+</div>
+
+  <div id="choices">
+  	<h1>Fire in webGL</h1>
   <form>
-  	<input type="radio" name="noise" id="simplex" value="simplex">Simplex  
-  	<input type="radio" name="noise" id="simplex_abs" value="simplex_abs">Simplex with abs
+  	<p class="boldHeader">Noise: </p>
+  	<input type="radio" name="noise" id="simplex" value="simplex">Simplex 1  
+  	<input type="radio" name="noise" id="simplex_abs" value="simplex_abs">Simplex 2
   	<input type="radio" name="noise" id="flow" value="flow" checked>Flow
+  	<br><br>
+  	<p class="boldHeader">Effects: </p>
+  	<input type="checkbox" name="addEffect" id="addEffect" value="addEffect">Cut out circle in the fire
   </form> 
+  </div>
 </body>
 
 </html> 
