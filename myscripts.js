@@ -103,6 +103,9 @@ function initShaders() {
 
   // hämta radio-button svaren.. typ.
   shaderProgram.selectedNoise = gl.getUniformLocation(shaderProgram, "selectedNoise");
+  shaderProgram.addEffect = gl.getUniformLocation(shaderProgram, "addEffect");
+  shaderProgram.effectWidth = gl.getUniformLocation(shaderProgram, "effectWidth");
+  shaderProgram.effectHeight = gl.getUniformLocation(shaderProgram, "effectHeight");
 
   shaderProgram.uTime = gl.getUniformLocation(shaderProgram, "uTime");
 
@@ -146,9 +149,9 @@ function initBuffers() {
     gl.bindBuffer(gl.ARRAY_BUFFER, vertexPositionBuffer);
     vertices = [
         0.0,    0.0,    0.0,
-        height,  0.0,    0.0,                                          
-        height,  width,  0.0,
-        0.0,    width,  0.0
+        width,  0.0,    0.0,                                          
+        width,  height,  0.0,
+        0.0,    height,  0.0
     ];
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
     vertexPositionBuffer.itemSize = 3;
@@ -216,36 +219,11 @@ function drawScene() {
     gl.drawElements(gl.TRIANGLES, vertexIndexBuffer.numItems,
 			gl.UNSIGNED_SHORT, 0);
 
-    /*
-    // TESTAR ATT RITA EN TILL.... HMMM -------------------------------------------
-    mat4.translate(mvMatrix, [0.1, 0.2, -0.1]);
-
-    // init the buffer for the square
-    gl.bindBuffer(gl.ARRAY_BUFFER, vertexPositionBuffer);
-    gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, vertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
-    
-    //set the texture coords
-    gl.bindBuffer(gl.ARRAY_BUFFER, vertexCoordBuffer);
-    gl.vertexAttribPointer(shaderProgram.aTextureCoord, vertexCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
-
-    // set texture image
-    //gl.activeTexture(gl.TEXTURE0);
-    //gl.bindTexture(gl.TEXTURE_2D, TextureRGBA);
-    //gl.uniform1i(shaderProgram.uSampler, 0); // Texture unit 0
-
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, vertexIndexBuffer);
-
-    setMatrixUniforms();
-    // Draw the single quad
-    gl.drawElements(gl.TRIANGLES, vertexIndexBuffer.numItems,
-      gl.UNSIGNED_SHORT, 0);
-    // ------------------------------------------------------------------------------
-    */
-
     // check what time it is and set as uniform variable for the animation
     var currentTime = (new Date).getTime(); // returns millisecunds
     gl.uniform1f(shaderProgram.uTime, 0.001 * (currentTime - startTime)); 
 
+    // get user inputs --------------------------------------------------------------------------
     // set selected noise, 0.0 for the simplex, 1.0 for the flow, 0.5 for the simplex with abs
     var noiseFromPage = 0.0;
     if (document.getElementById("simplex").checked)
@@ -255,8 +233,18 @@ function drawScene() {
     else 
       noiseFromPage = 1.0;
 
+    var e = document.getElementById("numberWidth");
+    var nWidth = e.options[e.selectedIndex].value;
+    e = document.getElementById("numberHeight");
+    var nHeight = e.options[e.selectedIndex].value;
+
+
     gl.uniform1f(shaderProgram.selectedNoise, noiseFromPage);
-    
+    gl.uniform1i(shaderProgram.addEffect, document.getElementById("addEffect").checked);
+    gl.uniform1f(shaderProgram.effectWidth, nWidth);
+    gl.uniform1f(shaderProgram.effectHeight, nHeight);
+
+    // end user input -------------------------------------------------------------------------
 
 }
 

@@ -1,9 +1,9 @@
 body {
 	text-align: center;
-	background-color: white;
-	color: black;
-	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-  	font-size: 11px;
+	background-color: black;
+	color: white;
+	font-family: 'Lato', sans-serif !important;
+  	font-size: 12px;
   	height: 100%;
   	width: 100%;
   	padding:0px;
@@ -14,10 +14,34 @@ body {
 	margin:0px;
 	padding: 0px;	
 	border: 0px solid black;
-	height: 95vh; 
-  	width: 100vw; 
+	/*height: 95vh; */
+  	width: 48vw; 
+  	height: 48vw;
+
+	float: left;
 }
 
 h1 {
-	font-family: 'Josefin Sans', sans-serif !important;
+	/*text-transform: uppercase;*/
+	font-family: 'Give You Glory', cursive;
+	font-size: 40px;
+}
+
+.boldHeader {
+	font-weight: bold;
+	color: #FFB759;
+	font-family: 'Lato', sans-serif !important;
+	text-transform: uppercase;
+}
+
+#theCanvas{
+	width: 50vw;
+}
+#choices{
+	margin:0px;
+	padding-right: 2%;
+	padding-top: 2%;
+	text-align: left;
+	float: right;
+	width: 48vw;
 }
