@@ -219,7 +219,7 @@
 		vec2 g1, g2; // gradient out for the flow noise
 
 		// adding more on the x to make the flame higher than the width, adding time to y so that the flames will go uppwards
-		float n = 0.32*abs(srdnoise(vec2(8.0*p.x, 2.0*p.y+0.5*t), 0.1*t, g1)); 
+		float n = 0.32*abs(srdnoise(vec2(8.0*p.x, 2.0*p.y+0.4*t), 0.1*t, g1)); 
 		n += 0.5*abs(srdnoise(vec2(16.0*p.x, 4.0*p.y+0.3*t), 0.2*g1.x, g1));
   		n += 0.8 * abs(srdnoise(vec2(8.0*p.x+0.1*t, p.y+0.2*t), 0.15*t, g1))+0.3;
   		n = 1.0-abs(n);
@@ -242,9 +242,9 @@
   		n += 0.5 * abs(snoise(vec3(16.0*p.x,4.0*p.y+0.6*t,0.2*t)));
   		n += 0.25 * abs(snoise(vec3(32.0*p.x, 8.0*p.y+0.1*t,0.4*t)));
 
-  		float n1 = 0.5*snoise(vec3(32.0*p.x, 8.0*p.y+0.1*t,0.3*t));
+  		float n1 = 0.5*snoise(vec3(32.0*p.x, 8.0*p.y+0.1*t,0.3*t))+0.1;
   		n1 = 1.0 - abs(n1);
-  		n1 += 0.3 * snoise(vec3(16.0*p.x, 8.0*p.y+0.6*t, 0.5*t));
+  		n1 += 0.5 * snoise(vec3(16.0*p.x+0.1*t, 8.0*p.y+0.6*t, 0.5*t));
 
   		return mix(n1,n,0.5);
 	}
