@@ -1,11 +1,4 @@
-/*
- * Just nu en fil för alla javascript-funktioner osv.. 
- * Göra det snyggare sen helt enkelt. Bara för att få ett enkelt test att funka!
- */
-
 /* ----------------------------------------------------------------------------------- */
-// Code found at: https://developer.mozilla.org/en-US/docs/Web/WebGL/Getting_started_with_WebGL
-
 var gl; // A global variable for the WebGL context
 
 function initWebGL(canvas) {  
@@ -16,8 +9,7 @@ function initWebGL(canvas) {
     gl.viewportHeight = canvas.height;
   }
   catch(e) {}
-  
-  // If we don't have a GL context, give up now
+  // If we don't have a GL context, alert
   if (!gl) {
     alert("Unable to initialize WebGL. Your browser may not support it.");
   }
@@ -25,7 +17,7 @@ function initWebGL(canvas) {
 
 /* ----------------------------------------------------------------------------------- */
 
-/* Found this stuff on other site.. For setup the shaders and the program */
+/* For setup the shaders and the program */
 function getShader(gl, id) {
   var shaderScript = document.getElementById(id);
   if (!shaderScript) {
@@ -88,6 +80,7 @@ function initShaders() {
 
   gl.useProgram(shaderProgram);
 
+  // attributes and uniforms for the shaders
   shaderProgram.vertexPositionAttribute = gl.getAttribLocation(shaderProgram, "aVertexPosition");
   gl.enableVertexAttribArray(shaderProgram.vertexPositionAttribute);
 
@@ -97,42 +90,18 @@ function initShaders() {
   shaderProgram.pMatrixUniform = gl.getUniformLocation(shaderProgram, "uPMatrix");
   shaderProgram.mvMatrixUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
 
-  // används för att skriva ut i pixlar istället för -1 till 1 som alltid är i typ..
   shaderProgram.resolutionLocation = gl.getUniformLocation(shaderProgram, "u_resolution");
   gl.uniform2f(shaderProgram.resolutionLocation, document.getElementById("glcanvas").width, document.getElementById("glcanvas").height);
 
-  // hämta radio-button svaren.. typ.
+  // for the user inputs
   shaderProgram.selectedNoise = gl.getUniformLocation(shaderProgram, "selectedNoise");
   shaderProgram.addEffect = gl.getUniformLocation(shaderProgram, "addEffect");
   shaderProgram.effectWidth = gl.getUniformLocation(shaderProgram, "effectWidth");
   shaderProgram.effectHeight = gl.getUniformLocation(shaderProgram, "effectHeight");
+  shaderProgram.sameSize = gl.getUniformLocation(shaderProgram, "sameSize");
 
   shaderProgram.uTime = gl.getUniformLocation(shaderProgram, "uTime");
 
-}
-
-// handle textrues. stegu. 
-function handleLoadedTexture(texture) {
-  gl.bindTexture(gl.TEXTURE_2D, texture);
-  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
-  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, texture.image);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-  // Image dimensions might be not-powers-of-two (NPOT), so avoid unsupported wrap modes
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-  // Do not generate mipmaps. Mipmaps are not supported for NPOT textures in WebGL.
-  gl.bindTexture(gl.TEXTURE_2D, null);
-}
-var TextureRGBA;
-
-function initTexture() {
-  TextureRGBA = gl.createTexture();
-  TextureRGBA.image = new Image();
-  TextureRGBA.image.onload = function () {
-    handleLoadedTexture(TextureRGBA)
-  }
-  TextureRGBA.image.src = "fire.gif";
 }
 
 
@@ -143,9 +112,10 @@ var vertexIndexBuffer;
 function initBuffers() {
     vertexPositionBuffer = gl.createBuffer();
 
-    var width = document.getElementById("glcanvas").width;//500.0;
-    var height = document.getElementById("glcanvas").height;//500.0;
+    var width = document.getElementById("glcanvas").width;    //500.0;
+    var height = document.getElementById("glcanvas").height;  //500.0;
 
+    // init a square
     gl.bindBuffer(gl.ARRAY_BUFFER, vertexPositionBuffer);
     vertices = [
         0.0,    0.0,    0.0,
@@ -157,7 +127,7 @@ function initBuffers() {
     vertexPositionBuffer.itemSize = 3;
     vertexPositionBuffer.numItems = 4;
 
-    // texture coords, för att kunna beräkna x och y typ just nu
+    // texture coordinates
     vertexCoordBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, vertexCoordBuffer);
     var textureCoords = [
@@ -184,10 +154,6 @@ function initBuffers() {
     vertexIndexBuffer.numItems = 6;
 }
 
-function initBuffers2(){
-    vertexPositionBuffer = gl.createBuffer();
-
-}
 
 var startTime = (new Date).getTime();
 function drawScene() {
@@ -207,14 +173,10 @@ function drawScene() {
     gl.bindBuffer(gl.ARRAY_BUFFER, vertexCoordBuffer);
     gl.vertexAttribPointer(shaderProgram.aTextureCoord, vertexCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
-    // set texture image
-    //gl.activeTexture(gl.TEXTURE0);
-    //gl.bindTexture(gl.TEXTURE_2D, TextureRGBA);
-    //gl.uniform1i(shaderProgram.uSampler, 0); // Texture unit 0
-
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, vertexIndexBuffer);
 
     setMatrixUniforms();
+
     // Draw the single quad
     gl.drawElements(gl.TRIANGLES, vertexIndexBuffer.numItems,
 			gl.UNSIGNED_SHORT, 0);
@@ -223,7 +185,8 @@ function drawScene() {
     var currentTime = (new Date).getTime(); // returns millisecunds
     gl.uniform1f(shaderProgram.uTime, 0.001 * (currentTime - startTime)); 
 
-    // get user inputs --------------------------------------------------------------------------
+    // ------------------------GET USER INPUTS--------------------------------------------------
+    
     // set selected noise, 0.0 for the simplex, 1.0 for the flow, 0.5 for the simplex with abs
     var noiseFromPage = 0.0;
     if (document.getElementById("simplex").checked)
@@ -238,13 +201,27 @@ function drawScene() {
     e = document.getElementById("numberHeight");
     var nHeight = e.options[e.selectedIndex].value;
 
+    // if the addEffect on the page in not checked, we can not choose the sameSize
+    if (!document.getElementById("addEffect").checked) {
+      document.getElementById("sameSize").disabled = true;
+      document.getElementById("sameSize").checked = false;
+      document.getElementById("numberWidth").disabled = true;
+      document.getElementById("numberHeight").disabled = true;
+    }
+    else {
+      document.getElementById("sameSize").disabled = false;
+      document.getElementById("numberWidth").disabled = false;
+      document.getElementById("numberHeight").disabled = false;
 
+    }
+
+    gl.uniform1i(shaderProgram.sameSize, document.getElementById("sameSize").checked);
     gl.uniform1f(shaderProgram.selectedNoise, noiseFromPage);
     gl.uniform1i(shaderProgram.addEffect, document.getElementById("addEffect").checked);
     gl.uniform1f(shaderProgram.effectWidth, nWidth);
     gl.uniform1f(shaderProgram.effectHeight, nHeight);
 
-    // end user input -------------------------------------------------------------------------
+    // ---------------------------END USER INPUTS----------------------------------------------
 
 }
 
@@ -291,12 +268,11 @@ function webGLStart() {
     initWebGL(canvas);
     initShaders();
     initBuffers();
-    initTexture();
 
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
     gl.enable(gl.DEPTH_TEST);
 
-    // om lägga flera lager typ 
+    // if several layers
     gl.disable(gl.DEPTH_TEST);
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
