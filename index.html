@@ -35,6 +35,19 @@
 	#define fireRGB vec3(1.5,1.0,0.5)
 
   	// --------------- FLOW NOISE --------------------------------
+	//
+	// GLSL implementation of 2D "flow noise" as presented
+	// by Ken Perlin and Fabrice Neyret at Siggraph 2001.
+	// (2D simplex noise with analytic derivatives and
+	// in-plane rotation of generating gradients,
+	// in a fractal sum where higher frequencies are
+	// displaced (advected) by lower frequencies in the
+	// direction of their gradient. For details, please
+	// refer to the 2001 paper "Flow Noise" by Perlin and Neyret.)
+	//
+	// Author: Stefan Gustavson (stefan.gustavson@liu.se)
+	// Distributed under the terms of the MIT license.  	
+  	
 	// Helper constants
 	#define F2 0.366025403
 	#define G2 0.211324865
