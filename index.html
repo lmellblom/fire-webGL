@@ -1,4 +1,8 @@
 
+<!-- 	Done in the project TNM084 at Linköping University 2015.
+		by: Linnéa Mellblom. 
+		Some great info about noise: http://webstaff.itn.liu.se/~stegu/TNM084-2014/simplexnoise.pdf
+-->
 <!DOCTYPE html>
 <html>
 
@@ -31,6 +35,19 @@
 	#define fireRGB vec3(1.5,1.0,0.5)
 
   	// --------------- FLOW NOISE --------------------------------
+	//
+	// GLSL implementation of 2D "flow noise" as presented
+	// by Ken Perlin and Fabrice Neyret at Siggraph 2001.
+	// (2D simplex noise with analytic derivatives and
+	// in-plane rotation of generating gradients,
+	// in a fractal sum where higher frequencies are
+	// displaced (advected) by lower frequencies in the
+	// direction of their gradient. For details, please
+	// refer to the 2001 paper "Flow Noise" by Perlin and Neyret.)
+	//
+	// Author: Stefan Gustavson (stefan.gustavson@liu.se)
+	// Distributed under the terms of the MIT license.  	
+  	
 	// Helper constants
 	#define F2 0.366025403
 	#define G2 0.211324865
@@ -340,6 +357,7 @@
 
 	<div id="choices">
   		<h1>Procedural Fire</h1>
+
   		<form>
   			<p class="boldHeader">Noise: </p>
   			<input type="radio" name="noise" id="simplex" value="simplex">Simplex 1  
