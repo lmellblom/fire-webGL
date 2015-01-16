@@ -1,3 +1,6 @@
+/*  Done in the project TNM084 at Linköping University 2015.
+    by: Linnéa Mellblom. linme882
+*/
 /* ----------------------------------------------------------------------------------- */
 var gl; // A global variable for the WebGL context
 
