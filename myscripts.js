@@ -1,3 +1,6 @@
+/*  Done in the project TNM084 at Linköping University 2015.
+    by: Linnéa Mellblom. linme882
+*/
 /* ----------------------------------------------------------------------------------- */
 var gl; // A global variable for the WebGL context
 
@@ -187,14 +190,16 @@ function drawScene() {
 
     // ------------------------GET USER INPUTS--------------------------------------------------
     
-    // set selected noise, 0.0 for the simplex, 1.0 for the flow, 0.5 for the simplex with abs
+    // set selected noise, 0.0 for the simplex, 1.0 for the flow, 0.5 for the simplex2 and 1.5 for flow 2
     var noiseFromPage = 0.0;
-    if (document.getElementById("simplex").checked)
+    if (document.getElementById("simplex1").checked)
       noiseFromPage = 0.0;
-    else if (document.getElementById("simplex_abs").checked)
+    else if (document.getElementById("simplex2").checked)
       noiseFromPage = 0.5;
-    else 
+    else if(document.getElementById("flow").checked)
       noiseFromPage = 1.0;
+    else 
+      noiseFromPage = 1.5;
 
     var e = document.getElementById("numberWidth");
     var nWidth = e.options[e.selectedIndex].value;

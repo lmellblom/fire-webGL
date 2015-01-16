@@ -1,6 +1,6 @@
 
 <!-- 	Done in the project TNM084 at Linköping University 2015.
-		by: Linnéa Mellblom. 
+		by: Linnéa Mellblom. linme882
 		Some great info about noise: http://webstaff.itn.liu.se/~stegu/TNM084-2014/simplexnoise.pdf
 -->
 <!DOCTYPE html>
@@ -13,6 +13,7 @@
   <!-- FONTS-->
   <link href='http://fonts.googleapis.com/css?family=Give+You+Glory' rel='stylesheet' type='text/css'>
   <link href='http://fonts.googleapis.com/css?family=Lato:300' rel='stylesheet' type='text/css'>
+  
   <link rel="stylesheet" href="style.css">
 
   <script type="text/javascript" src="glMatrix.js"></script> 
@@ -32,7 +33,7 @@
   	uniform float effectHeight;
   	uniform bool sameSize;
 
-	#define fireRGB vec3(1.5,1.0,0.5)
+	#define fireRGB vec3(1.5,1.0,0.5) // used to desice the color of the fire
 
   	// --------------- FLOW NOISE --------------------------------
 	//
@@ -235,22 +236,38 @@
 	float fireFlowNoise(vec2 p, float t){
 		vec2 g1, g2; // gradient out for the flow noise
 
-		// adding more on the x to make the flame higher than the width, adding time to y so that the flames will go uppwards
+		// adding more on the x to make the flame higher than the width, adding time to y so that the flames will go uppwards, second variable will change rotation
 		float n = 0.32*abs(srdnoise(vec2(8.0*p.x, 2.0*p.y+0.4*t), 0.1*t, g1)); 
 		n += 0.5*abs(srdnoise(vec2(16.0*p.x, 4.0*p.y+0.3*t), 0.2*g1.x, g1));
   		n += 0.8 * abs(srdnoise(vec2(8.0*p.x+0.1*t, p.y+0.2*t), 0.15*t, g1))+0.3;
-  		n = 1.0-abs(n);
+  		n = 1.0-abs(n); // a bit more sharp
 
   		return n;
+
+	}
+
+	float fireFlowNoise2(vec2 p, float t){
+		vec2 g1, g2; // gradient out for the flow noise
+
+		// adding more on the x to make the flame higher than the width, adding time to y so that the flames will go uppwards, second variable will change rotation
+		float n = 0.32*(srdnoise(vec2(8.0*p.x, 2.0*p.y+0.4*t), 0.1*t, g1)); 
+		n += 0.5*(srdnoise(vec2(16.0*p.x, 4.0*p.y+0.3*t), 0.2*g1.x, g1));
+  		n += 0.8 * abs(srdnoise(vec2(8.0*p.x+0.1*t, p.y+0.2*t), 0.15*t, g1))+0.3;
+  		n = 1.0-abs(n); // a bit more sharp
+
+  		float n1 = 0.6*abs(srdnoise(vec2(16.0*p.x, 4.0*p.y+0.4*t), 0.21*t, g1)-0.3);
+  		n1 += 0.3*abs(srdnoise(vec2(32.0*p.x+0.1*t, 4.0*p.y+0.1*t), 0.17*t, g1));
+
+  		return mix(n,n1,0.5);
 	}
 
 	float fireSimplexNoise(vec2 p, float t){
 		// adding more on the x to make the flame higher than the width, adding time to y so that the flames will go uppwards
-		float n = abs(snoise(vec3(4.0*p.x,p.y+0.3*t,0.2*t)))*0.5+0.2;
+		float n = abs(snoise(vec3(4.0*p.x,p.y+0.3*t,0.2*t)))*0.5+0.3;
   		n += 0.5 * (snoise(vec3(16.0*p.x,4.0*p.y+0.6*t,0.3*t)));
   		n += 0.25 * (snoise(vec3(32.0*p.x+0.4*t, 8.0*p.y+0.7*t,0.4*t)));
 
-		return 1.0-abs(n);
+		return 1.0-abs(n); // a bit more sharp
 	}
 
 	float fireSimplexNoise2(vec2 p, float t){
@@ -260,7 +277,7 @@
   		n += 0.25 * abs(snoise(vec3(32.0*p.x, 8.0*p.y+0.1*t,0.4*t)));
 
   		float n1 = 0.5*snoise(vec3(32.0*p.x, 8.0*p.y+0.1*t,0.3*t))+0.1;
-  		n1 = 1.0 - abs(n1);
+  		n1 = 1.0 - abs(n1); // a bit more sharp
   		n1 += 0.5 * snoise(vec3(16.0*p.x+0.1*t, 8.0*p.y+0.6*t, 0.5*t));
 
   		return mix(n1,n,0.5);
@@ -271,7 +288,7 @@
 		// to make a check pattern based on the input of the user how many in row anf height
 		vec2 tileSize = vec2(1.0/effectWidth, 1.0/effectHeight);  
 		vec2 p2 = vec2(floor(p / tileSize));
-		// the individuall coordinated of each tile. 
+		// the individual coordinated of each tile. 
 		vec2 tile_coord = abs(mod(p/tileSize, 1.0)-0.5);
 		
 		float effect = (tile_coord.x*tile_coord.x+tile_coord.y*tile_coord.y)*6.0; // make a circle
@@ -295,13 +312,14 @@
         float alpha = 1.0;
 
   		// which fire noise to use depending on the user. Flow if 1.0, Simplex if 0.0 and Simplex2 if 0.5. 
-  		float n = ( selectedNoise == 1.0 ?  fireFlowNoise(p,t) : (selectedNoise==0.0 ? fireSimplexNoise(p,t) : fireSimplexNoise2(p,t)) ) ;
+  		float n = ( selectedNoise >= 1.0 ? (selectedNoise==1.0 ? fireFlowNoise(p,t) : fireFlowNoise2(p,t)) :
+  			 (selectedNoise==0.0 ? fireSimplexNoise(p,t) : fireSimplexNoise2(p,t)) ) ;
 
   		// the higher in y, the more will the flame go away. 
-  		float distortionScale = 4.0;
-  		float distortionBias = -0.1;
+  		float distortionScale = 4.5;
+  		float distortionBias = 0.1;
   		float perturb = ( (1.0-p.y) * distortionScale) + distortionBias;
-  		float perturb2 =( (1.0-p2.y) * 3.5) + distortionBias; // based on the coordinates of each tile in the check pattern. 
+  		float perturb2 =( (1.0-p2.y) * 2.8) + distortionBias; // based on the coordinates of each tile in the check pattern. 
 
   		// only add pertub if the addEffect is checked. If same size is checked, then every tile will have equally sized "circle" of fire
   		n = addEffect && !sameSize || !addEffect  ? n * perturb : n*perturb2 ; 
@@ -344,6 +362,7 @@
         vTextureCoord = aTextureCoord; 
     }
    </script>
+   <!-- WebGL stuff. InitWebGL, initShaders, initBuffers etc -->
    <script type="text/javascript" src="myscripts.js"></script>
 
 </head>
@@ -360,9 +379,10 @@
 
   		<form>
   			<p class="boldHeader">Noise: </p>
-  			<input type="radio" name="noise" id="simplex" value="simplex">Simplex 1  
-  			<input type="radio" name="noise" id="simplex_abs" value="simplex_abs">Simplex 2
-  			<input type="radio" name="noise" id="flow" value="flow" checked>Flow
+  			<input type="radio" name="noise" id="simplex1" value="simplex1">Simplex 1  
+  			<input type="radio" name="noise" id="simplex2" value="simplex2">Simplex 2
+  			<input type="radio" name="noise" id="flow" value="flow" checked>Flow 1
+  			<input type="radio" name="noise" id="flow2" value="flow2">Flow 2
   			<br><br>
 
   			<p class="boldHeader">Effects: </p>
