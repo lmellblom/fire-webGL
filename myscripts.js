@@ -189,9 +189,9 @@ function drawScene() {
     
     // set selected noise, 0.0 for the simplex, 1.0 for the flow, 0.5 for the simplex with abs
     var noiseFromPage = 0.0;
-    if (document.getElementById("simplex").checked)
+    if (document.getElementById("simplex1").checked)
       noiseFromPage = 0.0;
-    else if (document.getElementById("simplex_abs").checked)
+    else if (document.getElementById("simplex2").checked)
       noiseFromPage = 0.5;
     else 
       noiseFromPage = 1.0;
