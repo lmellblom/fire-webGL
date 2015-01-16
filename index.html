@@ -237,12 +237,28 @@
 		vec2 g1, g2; // gradient out for the flow noise
 
 		// adding more on the x to make the flame higher than the width, adding time to y so that the flames will go uppwards, second variable will change rotation
-		float n = 0.32*abs(srdnoise(vec2(8.0*p.x, 2.0*p.y+0.4*t), 0.1*t, g1))+0.1; 
+		float n = 0.32*abs(srdnoise(vec2(8.0*p.x, 2.0*p.y+0.4*t), 0.1*t, g1)); 
 		n += 0.5*abs(srdnoise(vec2(16.0*p.x, 4.0*p.y+0.3*t), 0.2*g1.x, g1));
   		n += 0.8 * abs(srdnoise(vec2(8.0*p.x+0.1*t, p.y+0.2*t), 0.15*t, g1))+0.3;
   		n = 1.0-abs(n); // a bit more sharp
 
   		return n;
+
+	}
+
+	float fireFlowNoise2(vec2 p, float t){
+		vec2 g1, g2; // gradient out for the flow noise
+
+		// adding more on the x to make the flame higher than the width, adding time to y so that the flames will go uppwards, second variable will change rotation
+		float n = 0.32*(srdnoise(vec2(8.0*p.x, 2.0*p.y+0.4*t), 0.1*t, g1)); 
+		n += 0.5*(srdnoise(vec2(16.0*p.x, 4.0*p.y+0.3*t), 0.2*g1.x, g1));
+  		n += 0.8 * abs(srdnoise(vec2(8.0*p.x+0.1*t, p.y+0.2*t), 0.15*t, g1))+0.3;
+  		n = 1.0-abs(n); // a bit more sharp
+
+  		float n1 = 0.6*abs(srdnoise(vec2(16.0*p.x, 4.0*p.y+0.4*t), 0.21*t, g1)-0.3);
+  		n1 += 0.3*abs(srdnoise(vec2(32.0*p.x+0.1*t, 4.0*p.y+0.1*t), 0.17*t, g1));
+
+  		return mix(n,n1,0.5);
 	}
 
 	float fireSimplexNoise(vec2 p, float t){
@@ -296,7 +312,8 @@
         float alpha = 1.0;
 
   		// which fire noise to use depending on the user. Flow if 1.0, Simplex if 0.0 and Simplex2 if 0.5. 
-  		float n = ( selectedNoise == 1.0 ?  fireFlowNoise(p,t) : (selectedNoise==0.0 ? fireSimplexNoise(p,t) : fireSimplexNoise2(p,t)) ) ;
+  		float n = ( selectedNoise >= 1.0 ? (selectedNoise==1.0 ? fireFlowNoise(p,t) : fireFlowNoise2(p,t)) :
+  			 (selectedNoise==0.0 ? fireSimplexNoise(p,t) : fireSimplexNoise2(p,t)) ) ;
 
   		// the higher in y, the more will the flame go away. 
   		float distortionScale = 4.5;
@@ -364,7 +381,8 @@
   			<p class="boldHeader">Noise: </p>
   			<input type="radio" name="noise" id="simplex1" value="simplex1">Simplex 1  
   			<input type="radio" name="noise" id="simplex2" value="simplex2">Simplex 2
-  			<input type="radio" name="noise" id="flow" value="flow" checked>Flow
+  			<input type="radio" name="noise" id="flow" value="flow" checked>Flow 1
+  			<input type="radio" name="noise" id="flow2" value="flow2">Flow 2
   			<br><br>
 
   			<p class="boldHeader">Effects: </p>
