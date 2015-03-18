@@ -5,7 +5,7 @@ body {
 	text-align: center;
 	background-color: black;
 	color: white;
-	font-family: 'Lato', sans-serif !important;
+	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif !important;
   	font-size: 12px;
   	height: 100%;
   	width: 100%;
@@ -29,14 +29,14 @@ body {
 
 h1 {
 	/*text-transform: uppercase;*/
-	font-family: 'Give You Glory', cursive;
+	font-family: 'Josefin Sans', sans-serif;
 	font-size: 40px;
 }
 
 .boldHeader {
 	font-weight: bold;
 	color: #FFB759;
-	font-family: 'Lato', sans-serif !important;
+	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif !important;
 	text-transform: uppercase;
 }
 
