@@ -55,19 +55,19 @@ h1 {
 
 @media screen and (max-width: 700px)  {
 	#glcanvas {
-		width: 48vh;
-		height: 48vh;
+		width: 98vw;
+		height: 98vw;
 		float: none;
 	}
 	#choices {
 		width: 48vh;
 		float: none;
-		text-align: center !important;
+		text-align: justify !important;
 		margin-left: auto;
     	margin-right: auto;
 	}
 	#theCanvas{
-		width: 48vh;
+		width: 98vw;
 	    margin-left: auto;
     	margin-right: auto;
 	}
