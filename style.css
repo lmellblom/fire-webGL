@@ -76,7 +76,7 @@ h1 {
 	}
 	html {
 		font-size: 10px !important;
-		text-align: center !important;
+		text-align: justify; !important;
 	}
 
 }
