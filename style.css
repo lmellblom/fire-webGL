@@ -6,11 +6,12 @@ body {
 	background-color: black;
 	color: white;
 	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif !important;
-  	font-size: 12px;
+  	  font-size: 11px;
+  line-height: 1.42857143;
   	height: 100%;
   	width: 100%;
   	padding:0px;
-  	margin: 0px;
+  	margin: 0px 0px 10px 0px;
 }
 
 #glcanvas {
@@ -45,15 +46,28 @@ h1 {
 }
 #choices{
 	margin:0px;
-	padding-right: 2%;
-	padding-top: 2%;
+	padding: 7px;
 	text-align: left;
 	float: right;
 	width: 48vw;
+	border: 0px solid white;
 }
 
 
-@media screen and (max-width: 700px)  {
+/* Landscape */
+@media screen and (orientation:landscape) and (max-width: 700px) {
+/* Landscape styles */
+	h1 {
+		font-size: 22px;
+	}
+		html {
+		font-size: 10px !important;
+		text-align: justify; !important;
+	}
+}
+
+/* Portrait */
+@media screen and (max-width: 700px) and (orientation:portrait) {
 	#glcanvas {
 		width: 98vw;
 		height: 98vw;
