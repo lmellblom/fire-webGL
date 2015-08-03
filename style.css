@@ -1,26 +1,49 @@
 /*  Done in the project TNM084 at Linköping University 2015.
     by: Linnéa Mellblom. linme882
 */
-body {
-	text-align: center;
+html {
 	background-color: black;
 	color: white;
-	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif !important;
+}
+body {
+	/*text-align: center;*/
+	background-color: black !important;
+	/*font-family: "Helvetica Neue", Helvetica, Arial, sans-serif !important;
   	  font-size: 11px;
-  line-height: 1.42857143;
+  line-height: 1.42857143;*/
   	height: 100%;
   	width: 100%;
   	padding:0px;
-  	margin: 0px 0px 10px 0px;
+  	margin-left: auto;
+  	margin-right: auto;
 }
 
+.fa-cog {
+	cursor:default;
+}
+
+.fa-info {
+	margin-right: 20px;
+}
+
+.jumbotron {
+	text-align: center;
+}
+
+#theCanvas {
+	text-align: center;
+}
+
+
 #glcanvas {
-	margin:0px;
+	/*margin:0px;
 	padding: 0px;	
-	border: 0px solid black;
-  	width: 48vw; 
-  	height: 48vw;
-	float: left;
+	border: 0px solid black;*/
+  	width: 85vh; 
+  	height: 85vh;
+  	margin-left: auto;
+  	margin-right: auto;
+
 }
 
 .smaller {
@@ -29,29 +52,34 @@ body {
 }
 
 h1 {
+	color: black !important;
 	/*text-transform: uppercase;*/
-	font-family: 'Josefin Sans', sans-serif;
-	font-size: 40px;
+	/*font-family: 'Josefin Sans', sans-serif;
+	font-size: 40px;*/
 }
 
 .boldHeader {
-	font-weight: bold;
+	/*font-weight: bold;
 	color: #FFB759;
 	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif !important;
-	text-transform: uppercase;
+	text-transform: uppercase;*/
 }
 
-#theCanvas{
-	width: 50vw;
+.all-options {
+	color: black !important;
 }
-#choices{
+
+/*#theCanvas{
+	width: 50vw;
+}*/
+/*#choices{
 	margin:0px;
 	padding: 7px;
 	text-align: left;
 	float: right;
 	width: 48vw;
 	border: 0px solid white;
-}
+}*/
 
 
 /* Landscape */
@@ -73,13 +101,13 @@ h1 {
 		height: 98vw;
 		float: none;
 	}
-	#choices {
+	/*#choices {
 		width: 48vh;
 		float: none;
 		text-align: justify !important;
 		margin-left: auto;
     	margin-right: auto;
-	}
+	}*/
 	#theCanvas{
 		width: 98vw;
 	    margin-left: auto;
