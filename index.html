@@ -393,9 +393,11 @@
 
   	<div class="jumbotron">
   		<div class="container"> 
- 			<h1>Procedurell Eld <i class="pull-right fa fa-info" data-toggle="modal" data-target="#modalInfo"></i> </h1>
+ 			<h1>Procedurell Eld </h1>
 		</div>
   	</div>
+
+  	<div id="wrapper">
 
 	<div id="theCanvas">
 		<canvas id="glcanvas" width="400" height="400">
@@ -403,7 +405,7 @@
 		</canvas>
 	</div>
 
-	<div id="choices">
+	<div id="choices" class="container">
 		<h3 class="text-uppercase">Inställningar</h3>
 			      	<small>Här kan du ställa in olika parametrar för att styra hur elden ska uppföra sig och därmed se ut. Testa gärna olika värden, noise och se hur det ser ut. </small>
 
@@ -442,41 +444,28 @@
 				<input type="checkbox" name="sameSize" id="sameSize" value="sameSize"> Lika stora lågor<br>
 			</form> 
 	</div>
+</div>
 
-	<!-- info -->
-	<div class="modal fade" id="modalInfo" tabindex="-1" role="dialog" aria-labelledby="modalInfoLabel">
-	  <div class="modal-dialog" role="document">
-	    <div class="modal-content">
-	      <div class="modal-header">
-	        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-	        <h4 class="modal-title text-uppercase" id="modalInfoLabel">Vad är detta?</h4>
-	      </div>
-	      <div class="modal-body all-options">
-	      	<p class="lead">
+	<div id="info">
+		<div class="jumbotron">
+			<div class="container"> 
+				<h1>Vad är detta?</h1>
+			</div>
+		</div>
+		<div class="container"> 
+			<p class="lead">
 	      	Det här är ett skolprojekt som gjordes av Linnéa Mellblom i kursen TNM084, <i>Procedurella metoder för bilder</i>, i jan 2015 på Linköpings Universitet. 
 	        </p>
+	        <p>Rapporten som skrevs och lämnades in i kursen kan läsas <a href="report/fire_linme882.pdf" target="_blank">här</a>.</p>
 	        <p>Det som ses på sidan är procedurellt genererad eld som är skrivit i WebGL och shaders i GLSL. 
 	        Noise kan bli genererat och manipulerat på många olika sätt för att skapa visuella effekter. Det användas för att öka realismen i datorgrafik, detta då objekt inte har exempelvis en perfekt yta. Kan även användas för att slumvis ändra strukturen på moln eller eld. 
 
 	        <p>Citerat från studiehandboken om kursen: <blockquote><p>Procedurell generering av bilder är ett mycket användbart och ofta använt verktyg inom modern datorgrafik. Kursen avser att ge djupgående och allmängiltiga kunskaper om klassiska och moderna metoder för procedurell generering av bilder, speciellt texturer som avser att efterlikna komplicerade och visuellt detaljerade fenomen i naturen.</p></blockquote> </p>
 
 	        <p> <i class="fa fa-copyright"></i> Linnéa Mellblom. </p>
-	     </div>
-	    </div>
-	  </div>
+		</div>
+
 	</div>
 
 </body>
-
-<!-- GOOGLE analytic-->
-<script>
-  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-
-  ga('create', 'UA-58530564-1', 'auto');
-  ga('send', 'pageview');
-
-</script>
 </html> 

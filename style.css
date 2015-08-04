@@ -2,17 +2,25 @@
     by: Linnéa Mellblom. linme882
 */
 html {
-	background-color: black;
 	color: white;
 }
 body {
-	background-color: black !important;
   	height: 100%;
   	width: 100%;
   	padding:0px;
   	margin-left: auto;
   	margin-right: auto;
 }
+
+#info{
+	clear: both;
+	background-color: white;
+}
+
+#info .container {
+	padding: 15px;
+}
+
 
 .jumbotron {
 	padding: 10px;
@@ -29,19 +37,14 @@ body {
 }
 
 
-#theCanvas {
-	width: 50vw;
-	padding-top: 5px;
-}
-
 #glcanvas {
-	margin:0px;
 	padding: 0px;	
 	border: 0px solid black;
-  	width: 48vw; 
-  	height: 48vw;
+  	width: 100%; 
+  	height: 100%;
 	float: left;
-
+	margin-bottom:auto;
+	margin-top:auto;
 }
 
 .smaller {
@@ -67,17 +70,26 @@ h1 {
 	color: black !important;
 }
 
-#theCanvas{
-	width: 50vw;
+#wrapper {
+	overflow: hidden;
+	background-color: white;
+	height: 100%;
+  	width: 100%;
 }
+
+#theCanvas{
+	width: 50%;
+	background-color: black !important;
+}
+
 #choices{
 	margin:0px;
-	padding: 10px;
+	padding: 15px;
 	text-align: left;
 	float: right;
-	width: 48vw;
+	width: 50%;
 	border: 0px solid white;
-	color: white !important;
+	background-color: white !important;
 }
 #choices select{
 	width: 30px;
@@ -104,13 +116,16 @@ h1 {
 		width: 98vw;
 		height: 98vw;
 		float: none;
+		margin-bottom:auto;
+		margin-top:auto;
 	}
 	#choices {
-		width: 48vh;
+		width: 90vw;
 		float: none;
 		text-align: justify !important;
 		margin-left: auto;
     	margin-right: auto;
+    	background-color: white !important;
 	}
 	#theCanvas{
 		width: 98vw;
