@@ -1,5 +1,4 @@
 # :fire: Procedurell eld gjort i webGL och GLSL. 
-==========
 *Det här är ett skolprojekt som gjordes av Linnéa Mellblom i kursen TNM084, Procedurella metoder för bilder, i jan 2015 på Linköpings Universitet.*
 
 ## Vad är detta?
