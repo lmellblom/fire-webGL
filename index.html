@@ -21,10 +21,9 @@
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
      <!-- BOOTSTRAP -->
 
-   <!-- Latest compiled and minified CSS -->
-   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
-   <!-- Optional theme -->
-   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
+   <!-- Latest compiled and minified CSS
+   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">-->
+   <link rel="stylesheet" href="paper-bootstrap.css">
    <!-- Latest compiled and minified JavaScript -->
    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
 
@@ -394,7 +393,7 @@
 
   	<div class="jumbotron">
   		<div class="container"> 
- 			<h1>Procedurell Eld <i class="btn btn-default pull-right fa fa-cog" data-toggle="modal" data-target="#myModal"></i> <i class="btn btn-default pull-right fa fa-info" data-toggle="modal" data-target="#modalInfo"></i> </h1>
+ 			<h1>Procedurell Eld <i class="pull-right fa fa-info" data-toggle="modal" data-target="#modalInfo"></i> </h1>
 		</div>
   	</div>
 
@@ -404,56 +403,45 @@
 		</canvas>
 	</div>
 
-	<!-- Modal -->
-	<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-	  <div class="modal-dialog" role="document">
-	    <div class="modal-content">
-	      <div class="modal-header">
-	        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-	        <h4 class="modal-title text-uppercase" id="myModalLabel">Inställningar</h4>
-	      </div>
-	      <div class="modal-body all-options">
-	      	<small>Här kan du ställa in olika parametrar för att styra hur elden ska uppföra sig och därmed se ut. Testa gärna olika värden, noise och se hur det ser ut. </small>
+	<div id="choices">
+		<h3 class="text-uppercase">Inställningar</h3>
+			      	<small>Här kan du ställa in olika parametrar för att styra hur elden ska uppföra sig och därmed se ut. Testa gärna olika värden, noise och se hur det ser ut. </small>
 
-	        <form>
+	        
 	  			<h4>Vilken typ av noise</h4>
+	  			<form>
 	  			<input type="radio" name="noise" id="simplex1" value="simplex1" checked> Simplex, alt 1  <br>
 	  			<input type="radio" name="noise" id="simplex2" value="simplex2"> Simplex, alt 2<br>
 	  			<input type="radio" name="noise" id="flow" value="flow"> Flow, alt 1<br>
 	  			<input type="radio" name="noise" id="flow2" value="flow2"> Flow, alt 2
-	  			<br><br>
+	  		</form>
 
 	  			<h4>Lågor</h4>
 	  			<input type="checkbox" class="hidden" name="addEffect" id="addEffect" value="addEffect" checked> 
 	  			<small>Ställ in här hur många lågor du vill ha i sidled och höjdled. Även om det ska vara lika stora lågor eller annars avta när lågorna stiger.</small><br>
 
-
-
-
-	  			Antal i bredd: 
+	  			<form>
 	  			<select id="numberWidth">
 					<option value="1.0">1</option>
 					<option value="2.0" selected>2</option>
 					<option value="3.0">3</option>
 					<option value="4.0">4</option>
 				</select>
-				<br>
-				Antal i höjd: 
+				 st i bredd.
+				<br> 
 				<select id="numberHeight">
 					<option value="1.0">1</option>
 					<option value="2.0" selected>2</option>
 					<option value="3.0">3</option>
 					<option value="4.0">4</option>
 				</select>
+				 st i höjd.
+				</form>
 				<br>
-				
+				<form>
 				<input type="checkbox" name="sameSize" id="sameSize" value="sameSize"> Lika stora lågor<br>
 			</form> 
-	     </div>
-	    </div>
-	  </div>
 	</div>
-
 
 	<!-- info -->
 	<div class="modal fade" id="modalInfo" tabindex="-1" role="dialog" aria-labelledby="modalInfoLabel">
@@ -465,10 +453,12 @@
 	      </div>
 	      <div class="modal-body all-options">
 	      	<p class="lead">
-	      	Det här är ett skolprojekt som gjordes av Linnéa Mellblom i kursen TNM084 i dec 2014 på Linköpings Universitet. 
+	      	Det här är ett skolprojekt som gjordes av Linnéa Mellblom i kursen TNM084, <i>Procedurella metoder för bilder</i>, i jan 2015 på Linköpings Universitet. 
 	        </p>
-	        <p>Det som ses på sidan är procedurellt genererad eld som är skrivit i WebGL.
-	        </p>
+	        <p>Det som ses på sidan är procedurellt genererad eld som är skrivit i WebGL och shaders i GLSL. 
+	        Noise kan bli genererat och manipulerat på många olika sätt för att skapa visuella effekter. Det användas för att öka realismen i datorgrafik, detta då objekt inte har exempelvis en perfekt yta. Kan även användas för att slumvis ändra strukturen på moln eller eld. 
+
+	        <p>Citerat från studiehandboken om kursen: <blockquote><p>Procedurell generering av bilder är ett mycket användbart och ofta använt verktyg inom modern datorgrafik. Kursen avser att ge djupgående och allmängiltiga kunskaper om klassiska och moderna metoder för procedurell generering av bilder, speciellt texturer som avser att efterlikna komplicerade och visuellt detaljerade fenomen i naturen.</p></blockquote> </p>
 
 	        <p> <i class="fa fa-copyright"></i> Linnéa Mellblom. </p>
 	     </div>
